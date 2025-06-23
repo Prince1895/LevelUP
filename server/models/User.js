@@ -15,13 +15,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  role: {
-    type: String,
-    enum: ["student", "instructor", "admin"],
-    default: "student",
-  },
-  avatar: String,
-}, { timestamps: true });
+    role: {
+      type: String,
+      enum: ["student", "instructor", "admin"],
+      default: "student",
+    }
+  }, { timestamps: true });
 
 
 
