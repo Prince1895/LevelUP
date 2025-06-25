@@ -1,7 +1,13 @@
 import mongoose from "mongoose";
 
+
 const courseSchema = new mongoose.Schema(
   {
+     name: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+  
+    },
     title: {
       type: String,
       required: true,
@@ -26,13 +32,12 @@ const courseSchema = new mongoose.Schema(
       required:true,
     },
     image: {
-      type: String,
-      required:true,
+      type: String
     },
     instructor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required:true,
+  
     },
     published: {
       type: Boolean,

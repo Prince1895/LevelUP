@@ -5,9 +5,9 @@ import { requireRole } from "../middlewares/roleMiddleware.js";
 const courseRoutes = express.Router();
 
 courseRoutes.get("/all", getAllCourses);
-courseRoutes.get("/:id", getCourseById);
+courseRoutes.get("/by-id:id", getCourseById);
 courseRoutes.post("/create", authMiddleware, requireRole("instructor"), createCourse);
-courseRoutes.put("/update/:id", authMiddleware, requireRole("instructor","admin"), updateCourses);
-courseRoutes.delete("/delete/:id", authMiddleware, requireRole("instructor","admin"), deleteCourse);
+courseRoutes.put("/update/:id", authMiddleware, requireRole("instructor"), updateCourses);
+courseRoutes.delete("/delete/:id", authMiddleware, requireRole("instructor"), deleteCourse);
 
 export default courseRoutes;
