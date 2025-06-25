@@ -22,7 +22,7 @@ export const registerUser = async (req, res) => {
     });
   }
 
-  const { name, password, email, role = "student", avatar = "" } = parsed.data;
+  const { name, password, email, role = "student"} = parsed.data;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -36,8 +36,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role,
-      avatar,
+      role
     });
 
     return res.status(201).json({
