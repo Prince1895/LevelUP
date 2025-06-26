@@ -68,10 +68,10 @@ export const getCourseById = async (req, res) => {
 //create a new course
 export const createCourse = async (req, res) => {
   try {
-    const { title, description, category, instructor, price, duration, image } = req.body;
+    const { title, description, category, instructor, price, duration, published,image } = req.body;
 
   
-   const instructorId = req.user._id;
+ 
 
 
     const newCourse = new Course({
@@ -82,7 +82,7 @@ export const createCourse = async (req, res) => {
       price,
       duration,
       image,
-      instructor:instructorId,
+      instructor:req.user._id,
       published,
     });
 
@@ -117,10 +117,10 @@ export const updateCourses = async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
 
-    const userId = req.user._id;
+    const userId = req.user._id.toString();
     const userRole = req.user.role;
-    console.log("User ID from token:", userId);
-    console.log("Course instructor ID:", course.instructor.toString());
+    console.log("User ID from token:", userId.toString());
+    console.log("Course instructor ID:", course.instructor?.toString());
     console.log("User role:", userRole);
     if (userRole !== "admin" && (!course.instructor || course.instructor.toString() !== userId)) {
       return res.status(403).json({ message: "Unauthorized to update this course" });
@@ -152,24 +152,29 @@ export const updateCourses = async (req, res) => {
 //delete the course
 export const deleteCourse = async (req, res) => {
   try {
+    console.log("update course");
     const { id } = req.params;
+    console.log("id", id);
 
-    
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid course ID format" });
     }
+
     const course = await Course.findById(id);
 
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
-  
-    const userId = req.user._id;
-    const userRole = req.user.role;
 
-    if (userRole !== "admin" && course.instructor.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorized to delete this course" });
+    const userId = req.user._id.toString();
+    const userRole = req.user.role;
+    console.log("User ID from token:", userId.toString());
+    console.log("Course instructor ID:", course.instructor?.toString());
+    console.log("User role:", userRole);
+    if (userRole !== "admin" && (!course.instructor || course.instructor.toString() !== userId)) {
+      return res.status(403).json({ message: "Unauthorized to update this course" });
     }
+
     await course.deleteOne();
 
     return res.status(200).json({

@@ -7,7 +7,7 @@ const courseRoutes = express.Router();
 courseRoutes.get("/all", getAllCourses);
 courseRoutes.get("/by-id:id", getCourseById);
 courseRoutes.post("/create", authMiddleware, requireRole("instructor"), createCourse);
-courseRoutes.put("/update/:id", authMiddleware, requireRole("instructor"), updateCourses);
-courseRoutes.delete("/delete/:id", authMiddleware, requireRole("instructor"), deleteCourse);
+courseRoutes.put("/update/:id", authMiddleware, requireRole("instructor","admin"), updateCourses);
+courseRoutes.delete("/delete/:id", authMiddleware, requireRole("instructor","admin"), deleteCourse);
 
 export default courseRoutes;
