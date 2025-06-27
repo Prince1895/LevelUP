@@ -1,19 +1,35 @@
+// models/Lesson.js
 import mongoose from "mongoose";
 
-const lessonSchema = new mongoose.Schema({
-  course: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Course",
+const lessonSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    content: {
+      type: String,
+    },
+    videoUrl: {
+      type: String,
+    },
+    duration: {
+      type: String, 
+    },
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+      required: true,
+    },
+     resources: [
+      {
+        name: { type: String, required: true },      
+        type: { type: String },                        
+        url: { type: String, required: true },       
+      }
+    ]
   },
-  title: {
-    type: String,
-    required: true,
-  },
-  videoUrl: String, // Cloudinary / S3 URL
-  content: String, // markdown / text
-  attachment: String, // PDF, ZIP etc.
-  duration: Number, // in minutes
-  order: Number, // lesson order in course
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 export default mongoose.model("Lesson", lessonSchema);
