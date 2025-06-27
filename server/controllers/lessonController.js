@@ -5,7 +5,7 @@ import Course from "../models/Course.js";
 //create  lessons for course
 export const createLesson = async (req, res) => {
     try {
-        const { title, content, videoUrl, duration } = req.body;
+        const { title, content, videoUrl, duration,resources } = req.body;
 
         const { courseId } = req.params;
 
@@ -40,11 +40,14 @@ export const createLesson = async (req, res) => {
             content,
             videoUrl,
             duration,
-            course: courseId
+            course: courseId,
+            resources
         });
+        const savedLesson = await newLesson.save();
         course.lessons.push(newLesson._id);
         await course.save();
-        res.status(201).json({ message: "Lesson created", lesson: newLesson });
+
+        res.status(201).json({ message: "Lesson created",  course,lesson: savedLesson });
     } catch (error) {
         console.error("Create lesson error:", error);
         return res.status(500).json({ message: "Server error", error: error.message });
@@ -72,6 +75,30 @@ export const getAllLessons = async (req, res) => {
     }
 }
 
+//get lesson by id
+export const getLessonById = async (req, res) => {
+    try {
+        const { lessonId } = req.params;
+        if (!lessonId) {
+            return res.status(400).json({ message: "Lesson ID is required" });
+        }
+        if (!mongoose.Types.ObjectId.isValid(lessonId)) {
+            return res.status(400).json({ message: "Invalid lesson ID format" });
+        }
+        const lesson = await Lesson.findById(lessonId).populate("course","title");
+        if (!lesson) {
+            return res.status(404).json({ message: "Lesson not found" });
+        }
+        res.status(200).json({
+              message: "Lesson fetched successfully",
+               lesson 
+            });
+    } catch (error) {
+        console.error("get lesson by id error:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+}
+
 //get the update lessons by id
 export const updateLesson = async (req, res) => {
     try {
@@ -84,12 +111,13 @@ export const updateLesson = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    const { title, content, videoUrl, duration } = req.body;
+    const { title, content, videoUrl, duration,resources } = req.body;
 
     if (title) lesson.title = title;
     if (content) lesson.content = content;
     if (videoUrl) lesson.videoUrl = videoUrl;
     if (duration) lesson.duration = duration;
+    if (resources) lesson.resources = resources;
     const updated = await lesson.save();
 
     return res.status(200).json({ message: "Lesson updated successfully", lesson: updated });

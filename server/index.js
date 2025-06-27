@@ -5,10 +5,11 @@ import connectDB from "./config/db.js";
 import cors from 'cors';  
 import authRoutes from "./routes/authRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
+import lessonRoutes from "./routes/lessonRoutes.js";
 
 
 dotenv.config();
-connectDB(); // Connect to MongoDB
+connectDB(); 
 const app=express();
 (async () => {
   
@@ -21,6 +22,7 @@ const app=express();
   });
   app.use("/api/auth",authRoutes);
   app.use("/api/course",courseRoutes);
+  app.use("/api/lesson",lessonRoutes);
 
   const PORT = process.env.PORT || 4000;
   app.listen(PORT, () => {
