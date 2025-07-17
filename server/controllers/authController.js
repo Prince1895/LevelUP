@@ -3,9 +3,7 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import z from 'zod';
 
-// Register a new user
-
-
+// 📌 Register a new user
 export const registerUser = async (req, res) => {
   const requirebodySchema = z.object({
     name: z.string().min(1, 'Name is required'),
@@ -17,12 +15,12 @@ export const registerUser = async (req, res) => {
   const parsed = requirebodySchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({
-      message: "incorrect format credential",
+      message: "Incorrect format credential",
       issues: parsed.error.issues,
     });
   }
 
-  const { name, password, email, role = "student"} = parsed.data;
+  const { name, password, email, role = "student" } = parsed.data;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -36,16 +34,19 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role
+      role,
+      isApproved: role === "student",   // ✅ Students auto-approved
+      isBlocked: false
     });
 
     return res.status(201).json({
-      message: "Signed up successfully",
+      message: "Signed up successfully" + (role === "instructor" ? ". Please wait for admin approval." : ""),
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        isApproved: user.isApproved
       },
     });
   } catch (error) {
@@ -55,19 +56,19 @@ export const registerUser = async (req, res) => {
 };
 
 // Login a user
+// 🔐 Login a user
 export const loginUser = async (req, res) => {
   const requirebodySchema = z.object({
     email: z.string().email('Invalid email format'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
   });
-  const pwd = requirebodySchema.safeParse(req.body);
-  if (!pwd.success) {
-    return res.status(400).json({
-      message: "incorrect format credential"
-    });
+
+  const parsed = requirebodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ message: "Incorrect format credential" });
   }
 
-  const { email, password } = pwd.data;
+  const { email, password } = parsed.data;
 
   try {
     const user = await User.findOne({ email });
@@ -80,8 +81,20 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, role:user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
-   
+    // 🔐 Instructor approval check
+    if (user.role === "instructor" && !user.isApproved) {
+      return res.status(403).json({ message: "Instructor account not approved by admin" });
+    }
+
+    // 🔒 Blocked user check
+    if (user.isBlocked) {
+      return res.status(403).json({ message: "Your account has been blocked" });
+    }
+
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: '1d'
+    });
+
     return res.status(200).json({
       message: "Logged in successfully",
       token,
@@ -96,4 +109,4 @@ export const loginUser = async (req, res) => {
     console.error("Login error:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
   }
-}
+};

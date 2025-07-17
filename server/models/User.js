@@ -14,13 +14,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-    role: {
-      type: String,
-      enum: ["student", "instructor", "admin"],
-      default: "student",
-    }
-  }, { timestamps: true });
-
+  role: {
+    type: String,
+    enum: ["student", "instructor", "admin"],
+    default: "student",
+  },
+  isApproved: {
+    type: Boolean,
+    default: false, // Admin must approve instructors
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false, // Admin can block users
+  },
+}, { timestamps: true });
 
 
  const User=mongoose.model("User", userSchema);
