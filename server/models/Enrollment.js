@@ -9,6 +9,21 @@ const enrollmentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Course",
   },
+  isPaid: {
+  type: Boolean,
+  default: false,
+},
+paymentInfo: {
+  orderId: String,
+  paymentId: String,
+  status: String, // "success", "failed", etc.
+  amount: Number, // in paise
+},
+status: {
+  type: String,
+  enum: ["enrolled", "cancelled"],
+  default: "enrolled",
+},
   completedLessons: [
     {
       type: mongoose.Schema.Types.ObjectId,
