@@ -1,4 +1,5 @@
 
+import mongoose from 'mongoose';
 import Quiz from "../models/Quiz.js";
 import Lesson from "../models/Lesson.js";
 import Course from "../models/Course.js";
@@ -39,7 +40,7 @@ export const createQuiz = async (req, res) => {
 };
 
 //get all quiz of a lesson
-import mongoose from 'mongoose'; // <-- Add this
+
 
 export const getAllQuiz = async (req, res) => {
   try {

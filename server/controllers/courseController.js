@@ -69,11 +69,6 @@ export const getCourseById = async (req, res) => {
 export const createCourse = async (req, res) => {
   try {
     const { title, description, category, instructor, price, duration, published,image } = req.body;
-
-  
- 
-
-
     const newCourse = new Course({
      name:req.user.name,
       title,
@@ -152,7 +147,6 @@ export const updateCourses = async (req, res) => {
 //delete the course
 export const deleteCourse = async (req, res) => {
   try {
-    console.log("update course");
     const { id } = req.params;
     console.log("id", id);
 

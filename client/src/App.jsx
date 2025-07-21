@@ -1,8 +1,15 @@
 import React from 'react'
-
+import { Button } from "@/components/ui/button"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './Pages/Home';
 const App = () => {
   return (
-    <div>App</div>
+   
+      <Routes>
+      <Route path="/" element={<Home/>} />
+     </Routes>
+     
+   
   )
 }
 

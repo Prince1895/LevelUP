@@ -5,7 +5,7 @@ import Enrollment from "../models/Enrollment.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 // ✅ Enroll in Free Course
@@ -61,7 +61,7 @@ export const verifyPaymentAndEnroll = async (req, res) => {
 
   try {
     const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_SECRET)
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
 
