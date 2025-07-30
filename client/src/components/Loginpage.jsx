@@ -2,7 +2,7 @@ import { SplineScene } from "@/components/ui/splite";
 
 function Loginpage() {
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-neutral-900 text-white">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#0d0d0d] text-white">
       <div className="flex-1 flex flex-col justify-center items-center p-8">
         <div className="w-full max-w-md">
           <h1 className="text-3xl md:text-4xl font-bold text-center mb-6 bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400">
@@ -41,7 +41,7 @@ function Loginpage() {
 
           <p className="text-sm text-neutral-400 mt-4 text-center">
             Don't have an account?{" "}
-            <a href="#" className="text-indigo-400 hover:underline">Sign up</a>
+            <a href="/register" className="text-indigo-400 hover:underline">Sign up</a>
           </p>
         </div>
       </div>

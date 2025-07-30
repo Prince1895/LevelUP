@@ -26,7 +26,7 @@ const Navbar = ({ user = null, onLogout = () => {} }) => {
           <li>
             <MagneticButton>
               <a href="/login" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition">
-                Log In
+               Log In
               </a>
             </MagneticButton>
           </li>
@@ -100,17 +100,16 @@ const Navbar = ({ user = null, onLogout = () => {} }) => {
   };
 
   return (
-    <nav className={`
-      fixed left-1/2 transform -translate-x-1/2
-      transition-all duration-300 ease-in-out
-      z-50 backdrop-blur-lg
-      ${scrolled
-        ? `top-5 rounded-xl bg-white/10 shadow-lg
-           w-[850px] max-lg:w-[800px] max-[450px]:w-[400px]
-           max-[400px]:w-[345px] max-[350px]:w-[330px] max-[321px]:w-[310px]
-           px-3 py-3`
-        : 'top-0 w-full bg-transparent px-4 py-4'}
-    `}>
+   <nav className={`
+  fixed left-1/2 transform -translate-x-1/2
+  transition-all duration-300 ease-in-out
+  z-50 backdrop-blur-lg
+  ${scrolled
+    ? `top-5 rounded-xl bg-white/10 shadow-lg 
+       w-full max-w-7xl mx-auto px-4 py-3`
+    : 'top-0 w-full bg-transparent px-4 py-4'}
+`}>
+
       <div className="max-w-full flex justify-between items-center">
         <div>
 <div className="max-w-full flex justify-between items-center">
@@ -143,9 +142,10 @@ const Navbar = ({ user = null, onLogout = () => {} }) => {
 
       {/* Mobile Dropdown */}
       {mobileMenuOpen && (
-        <ul className="md:hidden mt-2 px-4 pt-2 pb-4 bg-black/80 backdrop-blur-md text-white shadow-md space-y-2 rounded-lg">
-          {renderLinks()}
-        </ul>
+       <ul className="md:hidden mt-2 px-4 pt-2 pb-4 bg-black/80 backdrop-blur-md text-white shadow-md space-y-8 rounded-lg flex flex-col">
+  {renderLinks()}
+</ul>
+
       )}
     </nav>
   );
