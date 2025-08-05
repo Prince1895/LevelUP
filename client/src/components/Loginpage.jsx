@@ -1,6 +1,29 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
+ // ✅ adjust as needed
 import { SplineScene } from "@/components/ui/splite";
 
 function Loginpage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const res = await API.post("/auth/login", { email, password });
+      console.log("Logged in user:", res.data);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.message || "Login failed");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#0d0d0d] text-white">
       <div className="flex-1 flex flex-col justify-center items-center p-8">
@@ -8,13 +31,15 @@ function Loginpage() {
           <h1 className="text-3xl md:text-4xl font-bold text-center mb-6 bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400">
             Welcome Back to LevelUP
           </h1>
-          
-          <form className="space-y-4">
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm mb-1 text-neutral-300">Email</label>
               <input
                 type="email"
                 id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 rounded-md bg-neutral-800 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="you@example.com"
               />
@@ -24,6 +49,8 @@ function Loginpage() {
               <input
                 type="password"
                 id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 rounded-md bg-neutral-800 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="••••••••"
               />
@@ -37,6 +64,8 @@ function Loginpage() {
             >
               Sign In
             </button>
+
+            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           </form>
 
           <p className="text-sm text-neutral-400 mt-4 text-center">

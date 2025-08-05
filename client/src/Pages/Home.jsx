@@ -13,7 +13,7 @@ import BookSessionSection from '@/components/BookSessionSection';
 const Home= () => {
   return (
     <>
-    <Navbar/>
+   
     <Hero/>
     <CourseSection/>
     <MarketplaceSection/>

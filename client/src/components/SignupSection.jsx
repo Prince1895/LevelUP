@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../api/axios"; // ✅ This works without alias
+ // ✅ Axios instance with baseURL and credentials
 
 function SignupPage() {
   const [form, setForm] = useState({
@@ -10,34 +13,55 @@ function SignupPage() {
   });
 
   const [showError, setShowError] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setShowError(false);
+    setError(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setShowError(false);
+    setError(null);
+
     if (form.password !== form.confirmPassword) {
       setShowError(true);
       return;
     }
 
-    // Handle form submission logic
-    console.log("Signup form data:", form);
+    try {
+      const res = await API.post("/auth/register", {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role,
+      });
+
+      alert(res.data.message); // or use a toast
+      navigate("/login");
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError(err.response?.data?.message || "Something went wrong.");
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#0d0d0d] pt-20 pb-20 text-white">
-
       {/* Left - Welcome Section */}
       <div className="hidden lg:flex flex-1 flex-col justify-center items-center bg-[#0d0d0d] text-white p-10 text-center">
         <h2 className="text-4xl font-extrabold mb-4">
           Welcome to <span className="text-indigo-500">LEVELUP</span> 🚀
         </h2>
         <p className="text-lg text-gray-300 max-w-md mb-6 leading-relaxed">
-          Join a thriving community where <span className="text-indigo-400 font-semibold">students</span> grow their skills through real-world learning,<br />
-          and <span className="text-indigo-400 font-semibold">instructors</span> share knowledge, build influence, and earn with purpose.
+          Join a thriving community where{" "}
+          <span className="text-indigo-400 font-semibold">students</span> grow
+          their skills through real-world learning,
+          <br />
+          and <span className="text-indigo-400 font-semibold">instructors</span>{" "}
+          share knowledge, build influence, and earn with purpose.
         </p>
         <p className="text-sm text-gray-500 italic">
           Together, we Learn. Build. Grow. And Teach with Impact.
@@ -53,7 +77,9 @@ function SignupPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm mb-1 text-neutral-300">Full Name</label>
+              <label htmlFor="name" className="block text-sm mb-1 text-neutral-300">
+                Full Name
+              </label>
               <input
                 type="text"
                 id="name"
@@ -67,7 +93,9 @@ function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm mb-1 text-neutral-300">Email</label>
+              <label htmlFor="email" className="block text-sm mb-1 text-neutral-300">
+                Email
+              </label>
               <input
                 type="email"
                 id="email"
@@ -81,7 +109,9 @@ function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="role" className="block text-sm mb-1 text-neutral-300">Role</label>
+              <label htmlFor="role" className="block text-sm mb-1 text-neutral-300">
+                Role
+              </label>
               <select
                 id="role"
                 name="role"
@@ -91,12 +121,13 @@ function SignupPage() {
               >
                 <option value="student">Student</option>
                 <option value="instructor">Instructor</option>
-                <option value="admin">Admin</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm mb-1 text-neutral-300">Password</label>
+              <label htmlFor="password" className="block text-sm mb-1 text-neutral-300">
+                Password
+              </label>
               <input
                 type="password"
                 id="password"
@@ -110,7 +141,9 @@ function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm mb-1 text-neutral-300">Confirm Password</label>
+              <label htmlFor="confirmPassword" className="block text-sm mb-1 text-neutral-300">
+                Confirm Password
+              </label>
               <input
                 type="password"
                 id="confirmPassword"
@@ -120,7 +153,9 @@ function SignupPage() {
                 required
                 className={`w-full px-4 py-2 rounded-md bg-neutral-800 text-white border ${
                   showError ? "border-red-500" : "border-neutral-700"
-                } focus:outline-none focus:ring-2 ${showError ? "focus:ring-red-500" : "focus:ring-indigo-500"}`}
+                } focus:outline-none focus:ring-2 ${
+                  showError ? "focus:ring-red-500" : "focus:ring-indigo-500"
+                }`}
                 placeholder="••••••••"
               />
               {showError && (
@@ -131,7 +166,10 @@ function SignupPage() {
             <div className="flex items-center text-sm">
               <input type="checkbox" required className="mr-2" />
               <label>
-                I agree to the <a href="#" className="text-indigo-400 underline">Terms and Conditions</a>
+                I agree to the{" "}
+                <a href="#" className="text-indigo-400 underline">
+                  Terms and Conditions
+                </a>
               </label>
             </div>
 
@@ -141,11 +179,17 @@ function SignupPage() {
             >
               Sign Up
             </button>
+
+            {error && (
+              <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+            )}
           </form>
 
           <p className="text-sm text-neutral-400 mt-4 text-center">
             Already have an account?{" "}
-            <a href="/login" className="text-indigo-400 hover:underline">Log In</a>
+            <a href="/login" className="text-indigo-400 hover:underline">
+              Log In
+            </a>
           </p>
         </div>
       </div>
