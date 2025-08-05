@@ -1,6 +1,4 @@
-import Navbar from '@/components/Navbar'
 import React from 'react'
-import Loginpage from '@/components/Loginpage'
 import Footer from '@/components/Footer';
 import Hero from '@/components/Hero';
 import InstructorSection from '@/components/InstructorSection';
@@ -13,19 +11,16 @@ import BookSessionSection from '@/components/BookSessionSection';
 const Home= () => {
   return (
     <>
-   
-    <Hero/>
-    <CourseSection/>
-    <MarketplaceSection/>
-    <InstructorSection/>
-    <SuccessStoriesSection/>
-    <UpcomingEventsSection/>
-    <BookSessionSection/>
-    <Footer/>
-   
+      <Hero/>
+      <CourseSection/>
+      <MarketplaceSection/>
+      <InstructorSection/>
+      <SuccessStoriesSection/>
+      <UpcomingEventsSection/>
+      <BookSessionSection/>
+      <Footer/>
     </>
- 
   )
 }
 
-export default Home
+export default Home;

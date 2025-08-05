@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Sidebar = ({ links }) => {
   return (
-    <div className="w-64 h-screen bg-[#111] text-white fixed top-0 left-0 p-6 space-y-4 shadow-lg">
+    <div className="w-64 min-h-screen bg-[#111] text-white fixed -z-10 top-0 left-0 p-6 pt-20 space-y-4 shadow-lg">
       <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
       <ul className="space-y-3">
         {links.map((link) => (

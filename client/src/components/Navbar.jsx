@@ -87,7 +87,7 @@ const Navbar = () => { // Remove the user and onLogout props
           <li><a href="/admin/approvals">Approvals</a></li>
           <li><a href="/admin/reports">Reports</a></li>
           <li className="relative group">
-            <button className="group-hover:text-indigo-400 text-white">Profile ▼</button>
+            <button className="group-hover:text-indigo-400 text-white">Profile </button>
             <ul className="absolute hidden group-hover:block bg-[#1a1a1a] border border-gray-700 shadow-lg mt-2 p-2 rounded-lg w-40 right-0">
               <li><a href="/profile" className="block px-4 py-2 text-white hover:bg-gray-700 rounded">My Profile</a></li>
               <li><button onClick={logout} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700 rounded">Logout</button></li>
@@ -108,7 +108,7 @@ const Navbar = () => { // Remove the user and onLogout props
   ${scrolled
         ? `top-5 rounded-xl bg-white/10 shadow-lg 
        w-full max-w-7xl mx-auto px-4 py-3`
-        : 'top-0 w-full bg-transparent px-4 py-4'}
+        : 'top-0 w-full bg-[black] px-4 py-4'}
 `}>
 
       <div className="max-w-full flex justify-between items-center">

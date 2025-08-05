@@ -20,7 +20,7 @@ function Loginpage() {
       const data = await response.json();
       if (response.ok) {
         login(data.user, data.token);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         console.error(data.message);
       }

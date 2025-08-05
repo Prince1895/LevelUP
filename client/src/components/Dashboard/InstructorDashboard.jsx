@@ -13,7 +13,7 @@ const InstructorDashboard = () => {
     <div className="flex">
       <Sidebar links={instructorLinks} />
       <main className="ml-64 w-full min-h-screen bg-[#1a1a1a] text-white p-10">
-        <h1 className="text-3xl font-semibold mb-4">Welcome Instructor!</h1>
+        <h1 className="text-3xl font-semibold mb-4 pt-10">Welcome Instructor!</h1>
         {/* Content here */}
       </main>
     </div>

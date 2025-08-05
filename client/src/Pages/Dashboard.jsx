@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import API from '@/api/axios';
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
 
 // Role-based dashboards
 import StudentDashboard from '@/components/Dashboard/StudentDashboard.jsx';
@@ -9,23 +9,7 @@ import InstructorDashboard from '@/components/Dashboard/InstructorDashboard.jsx'
 import AdminDashboard from '@/components/Dashboard/AdminDashboard.jsx';
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await API.get('/auth/me', { withCredentials: true });
-        setUser(res.data.user);
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
+  const { user, loading } = useContext(AuthContext); // Get user and loading state from context
 
   const renderDashboard = () => {
     if (!user) return <div className="text-center text-red-500 mt-10">Unauthorized. Please log in.</div>;
@@ -44,13 +28,13 @@ const Dashboard = () => {
 
   return (
     <>
-      <Navbar user={user} setUser={setUser} />
+      
       {loading ? (
         <div className="text-center mt-10 text-white">Loading dashboard...</div>
       ) : (
         renderDashboard()
       )}
-      <Footer />
+      
     </>
   );
 };

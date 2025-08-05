@@ -10,10 +10,10 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="flex">
+    <div className="flex pt-40">
       <Sidebar links={adminLinks} />
       <main className="ml-64 w-full min-h-screen bg-[#1a1a1a] text-white p-10">
-        <h1 className="text-3xl font-semibold mb-4">Welcome Admin!</h1>
+        <h1 className="text-3xl font-semibold mb-4 pt-10">Welcome Admin!</h1>
         {/* Content here */}
       </main>
     </div>
