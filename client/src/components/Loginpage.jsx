@@ -1,26 +1,31 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import API from "../api/axios";
- // ✅ adjust as needed
 import { SplineScene } from "@/components/ui/splite";
+import { useContext, useState } from 'react'; // Import useContext and useState
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 
 function Loginpage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-
     try {
-      const res = await API.post("/auth/login", { email, password });
-      console.log("Logged in user:", res.data);
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(err.response?.data?.message || "Login failed");
+      const response = await fetch('http://localhost:5000/api/auth/login', { // Replace with your backend URL
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        login(data.user, data.token);
+        navigate('/');
+      } else {
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error('Login failed', error);
     }
   };
 
@@ -32,7 +37,7 @@ function Loginpage() {
             Welcome Back to LevelUP
           </h1>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm mb-1 text-neutral-300">Email</label>
               <input
@@ -64,8 +69,6 @@ function Loginpage() {
             >
               Sign In
             </button>
-
-            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           </form>
 
           <p className="text-sm text-neutral-400 mt-4 text-center">
@@ -75,7 +78,7 @@ function Loginpage() {
         </div>
       </div>
       <div className="hidden lg:block flex-1 relative">
-        <SplineScene 
+        <SplineScene
           scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
           className="w-full h-full"
         />

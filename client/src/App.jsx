@@ -10,7 +10,7 @@ const App = () => {
   const [user, setUser] = useState(null); // User is set only after login/signup
 
   return (
-    <Router>
+    <>
       <Navbar user={user} setUser={setUser} />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -18,7 +18,7 @@ const App = () => {
         <Route path="/register" element={<Signup setUser={setUser} />} />
         <Route path="/dashboard" element={<Dashboard user={user} />} />
       </Routes>
-    </Router>
+    </>
   );
 };
 
