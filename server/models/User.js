@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false, // Admin must approve instructors
   },
+   dailyStreak: {
+    type: Number,
+    default: 0,
+  },
   isBlocked: {
     type: Boolean,
     default: false, // Admin can block users

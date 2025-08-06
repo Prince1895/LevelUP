@@ -104,3 +104,15 @@ export const getAllEnrollments = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+// NEW: Get enrollments for a specific course
+export const getEnrollmentsForCourse = async (req, res) => {
+    const { courseId } = req.params;
+    try {
+        const enrollments = await Enrollment.find({ course: courseId })
+            .populate('user', 'name email isBlocked');
+        res.status(200).json({ enrollments });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};

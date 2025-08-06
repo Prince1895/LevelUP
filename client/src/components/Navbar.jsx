@@ -48,7 +48,7 @@ const Navbar = () => { // Remove the user and onLogout props
         <>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/">Home</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/courses">Courses</a></li>
-          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/my-learning">My Learning</a></li>
+          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/dashboard">My Learning</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/certificates">Certificates</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/profile">My Profile</a></li>
          <li>
@@ -84,11 +84,11 @@ const Navbar = () => { // Remove the user and onLogout props
     if (user.role === 'admin') {
       return (
         <>
-          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin">Admin Panel</a></li>
+          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/dashboard">Admin Panel</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/users">Users</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/approvals">Approvals</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/reports">Reports</a></li>
-          <li   className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/profile">My Profile</a></li>
+          <li   className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/profile">My Profile</a></li>
            <li>
     <button 
         onClick={() => { logout(); navigate('/'); }} 

@@ -3,13 +3,30 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import z from 'zod';
 
-// Set cookie options
-const cookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production', // ensures cookies are only sent over HTTPS in production
-  sameSite: 'strict',
-  maxAge: 24 * 60 * 60 * 1000 // 1 day
+// Helper function to manage streak logic
+const updateUserStreak = async (user) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize to the start of the day
+
+  const lastLogin = user.lastLogin ? new Date(user.lastLogin) : null;
+  if (lastLogin) {
+    lastLogin.setHours(0, 0, 0, 0); // Normalize to the start of the day
+  }
+
+  if (!lastLogin || lastLogin.getTime() < today.getTime()) {
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    if (lastLogin && lastLogin.getTime() === yesterday.getTime()) {
+      user.dailyStreak += 1; // Increment streak
+    } else {
+      user.dailyStreak = 1; // Reset streak
+    }
+    user.lastLogin = new Date();
+    await user.save();
+  }
 };
+
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -47,12 +64,10 @@ export const registerUser = async (req, res) => {
       isBlocked: false
     });
 
-    // Generate token and set cookie (optional after register)
+    // Generate token
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '1d'
     });
-
-    res.cookie('token', token, cookieOptions);
 
     return res.status(201).json({
       message: "Signed up successfully" + (role === "instructor" ? ". Please wait for admin approval." : ""),
@@ -63,6 +78,7 @@ export const registerUser = async (req, res) => {
         role: user.role,
         isApproved: user.isApproved
       },
+      token,
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -98,17 +114,15 @@ export const loginUser = async (req, res) => {
     if (user.role === "instructor" && !user.isApproved) {
       return res.status(403).json({ message: "Instructor account not approved by admin" });
     }
-
     if (user.isBlocked) {
       return res.status(403).json({ message: "Your account has been blocked" });
     }
 
+    await updateUserStreak(user);
+
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '1d'
     });
-
-    // 🍪 Set cookie
-    res.cookie('token', token, cookieOptions);
 
     return res.status(200).json({
       message: "Logged in successfully",
@@ -116,8 +130,10 @@ export const loginUser = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        dailyStreak: user.dailyStreak,
       },
+      token,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -127,9 +143,10 @@ export const loginUser = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    // FIX: Changed req.user.id to req.user._id to match the structure set in authMiddleware
     const user = await User.findById(req.user._id).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    await updateUserStreak(user);
 
     res.status(200).json({ user });
   } catch (error) {
@@ -137,12 +154,7 @@ export const getMe = async (req, res) => {
   }
 };
 
-// Logout a user (clear cookie)
-export const logoutUser = (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  });
+// Logout a user
+export const logoutUser = (res) => {
   return res.status(200).json({ message: 'Logged out successfully' });
 };

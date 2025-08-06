@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Course from "../models/Course.js";
 import User from "../models/User.js";
+
 //get all courses
 export const getAllCourses = async (req, res) => {
   try {
@@ -68,16 +69,15 @@ export const getCourseById = async (req, res) => {
 //create a new course
 export const createCourse = async (req, res) => {
   try {
-    const { title, description, category, instructor, price, duration, published,image } = req.body;
+    const { title, description, category, price, duration, published, image } = req.body;
     const newCourse = new Course({
-     name:req.user.name,
       title,
       description,
       category,
       price,
       duration,
       image,
-      instructor:req.user._id,
+      instructor: req.user._id, // The user ID is now directly available
       published,
     });
 
@@ -93,6 +93,54 @@ export const createCourse = async (req, res) => {
   }
 };
 
+// NEW: Get courses for the logged-in instructor
+export const getInstructorCourses = async (req, res) => {
+  try {
+    const instructorId = req.user._id;
+
+    // Use MongoDB aggregation to fetch courses and their student counts efficiently
+    const courses = await Course.aggregate([
+      // Match courses by the instructor's ID
+      { $match: { instructor: instructorId } },
+      // Perform a lookup to the enrollments collection
+      {
+        $lookup: {
+          from: 'enrollments', // the name of the enrollments collection in your DB
+          localField: '_id',
+          foreignField: 'course',
+          as: 'enrollmentData'
+        }
+      },
+      // Add a new field 'studentCount' which is the size of the enrollmentData array
+      {
+        $addFields: {
+          studentCount: { $size: '$enrollmentData' }
+        }
+      },
+      // Project only the fields you need, removing the large enrollmentData array
+      {
+        $project: {
+          title: 1,
+          category: 1,
+          price: 1,
+          published: 1,
+          studentCount: 1,
+          createdAt: 1,
+        }
+      },
+      // Sort by creation date
+      { $sort: { createdAt: -1 } }
+    ]);
+
+    return res.status(200).json({
+      message: "Successfully fetched instructor courses",
+      courses,
+    });
+  } catch (error) {
+    console.error("Get Instructor Courses error:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
   
 
 //update the course

@@ -8,43 +8,57 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for an active session when the app loads
-    const checkLoggedIn = async () => {
-      try {
-        // The httpOnly cookie is sent automatically by the browser
-        const res = await API.get('/auth/me');
-        setUser(res.data.user);
-      } catch (err) {
-        // No valid session, so user is null
-        setUser(null);
-      } finally {
-        setLoading(false);
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        // Set the token in the API header for the initial check
+        API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        try {
+          // Verify the token with the backend and get fresh user data
+          const res = await API.get('/auth/me');
+          setUser(res.data.user);
+        } catch (err) {
+          // Token is invalid or expired
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+          delete API.defaults.headers.common['Authorization'];
+          console.error("Session check failed:", err);
+        }
       }
+      setLoading(false);
     };
 
-    checkLoggedIn();
+    initializeAuth();
   }, []);
 
-  const login = (userData) => {
-    // The cookie is set by the server, we just update the client state
+  const login = (userData, token) => {
+    // Store user data and token
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', token);
+    
+    // Set the user in state
     setUser(userData);
+
+    // Set the Authorization header for all subsequent requests
+    API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   };
 
-  const logout = async () => {
-    try {
-      // Tell the server to clear the authentication cookie
-      await API.post('/auth/logout');
-    } catch (err) {
-      console.error("Failed to logout from server:", err);
-    } finally {
-      // Clear the user state on the client
-      setUser(null);
-    }
+  const logout = () => {
+    // Clear user data and token
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+
+    // Clear the user from state
+    setUser(null);
+    
+    // Remove the Authorization header
+    delete API.defaults.headers.common['Authorization'];
   };
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>
-      {/* Don't render the app until the session check is complete */}
+      {/* Don't render the app until the initial session check is complete */}
       {!loading && children}
     </AuthContext.Provider>
   );

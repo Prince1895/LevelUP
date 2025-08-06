@@ -1,66 +1,22 @@
-// client/src/components/Dashboard/InstructorDashboard.jsx
 import React, { useState, useEffect, useContext } from 'react';
-import Sidebar from "@/components/Sidebar";
-import Footer from "@/components/Footer";
+import { Link } from 'react-router-dom';
 import API from "@/api/axios";
 import { AuthContext } from "@/context/AuthContext";
-import { FiBook, FiPlusSquare, FiDollarSign, FiUser, FiEdit, FiTrash2, FiEye } from "react-icons/fi";
+import { FiBook, FiPlusSquare, FiDollarSign, FiUser, FiEdit, FiTrash2, FiEye, FiUsers, FiFileText, FiBarChart2 } from "react-icons/fi";
+import Sidebar from "@/components/Sidebar";
+import Footer from "@/components/Footer";
+import Navbar from '../Navbar';
+import { Bar, Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 
-// A modal component for creating/editing a course
-const CourseModal = ({ course, onClose, onSave }) => {
-  const [formData, setFormData] = useState({
-    title: course?.title || '',
-    description: course?.description || '',
-    category: course?.category || '',
-    price: course?.price || 0,
-    duration: course?.duration || '',
-    published: course?.published || false,
-  });
+ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div className="bg-[#1a1a1a] p-8 rounded-lg w-full max-w-2xl border border-gray-700">
-        <h2 className="text-2xl font-bold mb-6">{course ? 'Edit Course' : 'Create New Course'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Course Title" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
-          <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Course Description" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700 h-24" required />
-          <div className="grid grid-cols-2 gap-4">
-            <input type="text" name="category" value={formData.category} onChange={handleChange} placeholder="Category (e.g., Web Development)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
-            <input type="number" name="price" value={formData.price} onChange={handleChange} placeholder="Price (USD)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
-          </div>
-          <input type="text" name="duration" value={formData.duration} onChange={handleChange} placeholder="Duration (e.g., 8 hours)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
-          <div className="flex items-center gap-3">
-            <input type="checkbox" name="published" checked={formData.published} onChange={handleChange} id="published" className="h-5 w-5" />
-            <label htmlFor="published">Publish this course immediately?</label>
-          </div>
-          <div className="flex justify-end gap-4 pt-4">
-            <button type="button" onClick={onClose} className="px-6 py-2 rounded-md border border-gray-600 hover:bg-gray-700 transition">Cancel</button>
-            <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 transition">Save Course</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-
+// --- Main Component ---
 const InstructorDashboard = () => {
   const { user } = useContext(AuthContext);
   const [courses, setCourses] = useState([]);
-  const [stats, setStats] = useState({ courses: 0, students: 0, revenue: 0 });
+  const [stats, setStats] = useState({ totalStudents: 0, totalRevenue: 0, totalQuizzes: 0 });
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCourse, setEditingCourse] = useState(null);
 
   const instructorLinks = [
     { label: "Dashboard", path: "/dashboard", icon: <FiBook /> },
@@ -70,35 +26,28 @@ const InstructorDashboard = () => {
     { label: "Profile", path: "/profile", icon: <FiUser /> },
   ];
 
-  // Fetch courses on component mount
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchDashboardData = async () => {
+      if (!user) return;
+      setIsLoading(true);
       try {
-        // Assuming you have an endpoint to get courses by instructor
-        const response = await API.get('/course/all'); // Adjust if you have a specific instructor route
-        // Filter courses that belong to the current instructor
-        const instructorCourses = response.data.courses.filter(course => course.instructor._id === user.id);
+        const response = await API.get('/course/instructor/my-courses');
+        const instructorCourses = response.data.courses;
         setCourses(instructorCourses);
+
+        const totalStudents = instructorCourses.reduce((acc, course) => acc + course.studentCount, 0);
+        // Fetch additional stats from dedicated endpoints if available
+        // For now, we'll use dummy data for revenue and quizzes
+        setStats({ totalStudents, totalRevenue: 1250, totalQuizzes: 15 });
+
       } catch (error) {
-        console.error("Failed to fetch courses:", error);
+        console.error("Failed to fetch dashboard data:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    if (user) {
-      fetchCourses();
-    }
+    fetchDashboardData();
   }, [user]);
-
-  const handleCreateCourse = () => {
-    setEditingCourse(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEditCourse = (course) => {
-    setEditingCourse(course);
-    setIsModalOpen(true);
-  };
 
   const handleDeleteCourse = async (courseId) => {
     if (window.confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
@@ -111,49 +60,74 @@ const InstructorDashboard = () => {
     }
   };
 
-  const handleSaveCourse = async (formData) => {
-    try {
-      if (editingCourse) {
-        // Update existing course
-        const response = await API.put(`/course/update/${editingCourse._id}`, formData);
-        setCourses(courses.map(c => c._id === editingCourse._id ? response.data.course : c));
-      } else {
-        // Create new course
-        const response = await API.post('/course/create', formData);
-        setCourses([...courses, response.data.course]);
-      }
-      setIsModalOpen(false);
-      setEditingCourse(null);
-    } catch (error) {
-      console.error("Failed to save course:", error);
-    }
+  const enrollmentData = {
+    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+    datasets: [
+      {
+        label: 'New Enrollments',
+        data: [65, 59, 80, 81, 56, 55],
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const revenueData = {
+    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+    datasets: [
+      {
+        label: 'Monthly Revenue',
+        data: [120, 190, 300, 500, 200, 300],
+        fill: false,
+        borderColor: 'rgb(255, 99, 132)',
+        tension: 0.1,
+      },
+    ],
   };
 
   return (
     <div className="flex">
       <Sidebar links={instructorLinks} />
       <div className="ml-64 w-full flex flex-col min-h-screen">
+        <Navbar/>
         <main className="flex-grow bg-[#1a1a1a] text-white p-10">
           <div className="flex justify-between items-center mb-8 pt-10">
             <h1 className="text-3xl font-bold">Welcome, {user?.name || 'Instructor'}! 👋</h1>
-            <button onClick={handleCreateCourse} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2">
+            <Link to="/instructor/create" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2">
               <FiPlusSquare /> Create New Course
-            </button>
+            </Link>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-[#111] p-6 rounded-lg border border-gray-800">
               <h3 className="text-lg font-semibold text-gray-400">Total Courses</h3>
               <p className="text-4xl font-bold">{courses.length}</p>
             </div>
             <div className="bg-[#111] p-6 rounded-lg border border-gray-800">
               <h3 className="text-lg font-semibold text-gray-400">Total Students</h3>
-              <p className="text-4xl font-bold">{stats.students}</p>
+              <p className="text-4xl font-bold">{stats.totalStudents}</p>
+            </div>
+             <div className="bg-[#111] p-6 rounded-lg border border-gray-800">
+              <h3 className="text-lg font-semibold text-gray-400">Total Quizzes</h3>
+              <p className="text-4xl font-bold">{stats.totalQuizzes}</p>
             </div>
             <div className="bg-[#111] p-6 rounded-lg border border-gray-800">
               <h3 className="text-lg font-semibold text-gray-400">Total Revenue</h3>
-              <p className="text-4xl font-bold">${stats.revenue.toFixed(2)}</p>
+              <p className="text-4xl font-bold">${stats.totalRevenue.toFixed(2)}</p>
+            </div>
+          </div>
+          
+          {/* Analytics Graphs */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="bg-[#111] p-6 rounded-lg border border-gray-800">
+                <h3 className="text-xl font-semibold mb-4">Enrollment Trends</h3>
+                <Bar data={enrollmentData} />
+            </div>
+            <div className="bg-[#111] p-6 rounded-lg border border-gray-800">
+                <h3 className="text-xl font-semibold mb-4">Revenue Growth</h3>
+                <Line data={revenueData} />
             </div>
           </div>
 
@@ -165,6 +139,7 @@ const InstructorDashboard = () => {
                 <thead>
                   <tr className="border-b border-gray-700">
                     <th className="p-4">Title</th>
+                    <th className="p-4">Students</th>
                     <th className="p-4">Status</th>
                     <th className="p-4">Price</th>
                     <th className="p-4">Actions</th>
@@ -172,10 +147,11 @@ const InstructorDashboard = () => {
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan="4" className="text-center p-4">Loading courses...</td></tr>
+                    <tr><td colSpan="5" className="text-center p-4">Loading courses...</td></tr>
                   ) : courses.map(course => (
                     <tr key={course._id} className="border-b border-gray-800 hover:bg-[#1f1f1f]">
                       <td className="p-4 font-medium">{course.title}</td>
+                      <td className="p-4">{course.studentCount}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 text-xs rounded-full ${course.published ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'}`}>
                           {course.published ? 'Published' : 'Draft'}
@@ -183,7 +159,7 @@ const InstructorDashboard = () => {
                       </td>
                       <td className="p-4">${course.price.toFixed(2)}</td>
                       <td className="p-4 flex items-center gap-3">
-                        <button onClick={() => handleEditCourse(course)} className="text-gray-400 hover:text-indigo-400"><FiEdit /></button>
+                        <Link to={`/instructor/course/${course._id}/edit`} className="text-gray-400 hover:text-indigo-400"><FiEdit /></Link>
                         <button onClick={() => handleDeleteCourse(course._id)} className="text-gray-400 hover:text-red-400"><FiTrash2 /></button>
                         <button className="text-gray-400 hover:text-blue-400"><FiEye /></button>
                       </td>
@@ -196,8 +172,6 @@ const InstructorDashboard = () => {
         </main>
         <Footer />
       </div>
-
-      {isModalOpen && <CourseModal course={editingCourse} onClose={() => setIsModalOpen(false)} onSave={handleSaveCourse} />}
     </div>
   );
 };
