@@ -1,10 +1,12 @@
+// client/src/components/Dashboard/MyCoursesInstructor.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import API from '@/api/axios';
 import { AuthContext } from '@/context/AuthContext';
-import { FiEdit, FiTrash2, FiPlusSquare, FiUsers, FiDollarSign } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlusSquare, FiUsers, FiDollarSign, FiBook, FiUser } from 'react-icons/fi';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
+import Navbar from '../Navbar';
 
 const MyCoursesInstructor = () => {
   const { user } = useContext(AuthContext);
@@ -25,12 +27,16 @@ const MyCoursesInstructor = () => {
       if (!user) return;
       setIsLoading(true);
       try {
-        const [courseRes, enrollmentRes] = await Promise.all([
-          API.get('/course/all'),
-          API.get('/enrollment/all')
-        ]);
-
+        // Fetches all courses from the backend using the GET /api/course/all route
+        const courseRes = await API.get('/course/all');
+        
+        // This is a client-side filter. Ensure that `user.id` from your AuthContext
+        // matches the `course.instructor._id` from your backend.
         const instructorCourses = courseRes.data.courses.filter(c => c.instructor._id === user.id);
+        
+        // You may want to create a backend route to get enrollments per instructor
+        // to make this more efficient.
+        const enrollmentRes = await API.get('/enrollment/all');
         const allEnrollments = enrollmentRes.data.enrollments;
 
         const coursesWithStats = instructorCourses.map(course => {
@@ -52,6 +58,7 @@ const MyCoursesInstructor = () => {
   const handleDelete = async (courseId) => {
     if (window.confirm("Are you sure you want to delete this course?")) {
       try {
+        // Deletes a course using the DELETE /api/course/delete/:id route
         await API.delete(`/course/delete/${courseId}`);
         setCourses(courses.filter(c => c._id !== courseId));
       } catch (error) {
@@ -61,11 +68,13 @@ const MyCoursesInstructor = () => {
   };
 
   return (
-    <div className="flex pt-20">
+    <>
+    <Navbar/>
+    <div className="flex ">
       <Sidebar links={instructorLinks} />
       <div className="ml-64 w-full flex flex-col min-h-screen">
         <main className="flex-grow bg-[#1a1a1a] text-white p-10">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center mb-8 pt-10">
             <h1 className="text-3xl font-bold">My Courses</h1>
             <Link to="/instructor/create" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2">
               <FiPlusSquare /> Create New Course
@@ -95,7 +104,8 @@ const MyCoursesInstructor = () => {
                   </div>
                   <div className="bg-gray-800/50 px-6 py-3 flex justify-end items-center gap-4">
                     <button className="text-gray-400 hover:text-indigo-400" title="Manage Content"><FiBook /></button>
-                    <button className="text-gray-400 hover:text-green-400" title="Edit Course"><FiEdit /></button>
+                    {/* This should link to an edit page or open a modal */}
+                    <Link to={`/instructor/course/${course._id}/edit`} className="text-gray-400 hover:text-green-400" title="Edit Course"><FiEdit /></Link>
                     <button onClick={() => handleDelete(course._id)} className="text-gray-400 hover:text-red-400" title="Delete Course"><FiTrash2 /></button>
                   </div>
                 </div>
@@ -106,6 +116,7 @@ const MyCoursesInstructor = () => {
         <Footer />
       </div>
     </div>
+    </>
   );
 };
 

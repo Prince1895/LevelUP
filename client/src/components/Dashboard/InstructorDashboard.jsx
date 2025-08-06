@@ -1,3 +1,4 @@
+// client/src/components/Dashboard/InstructorDashboard.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
