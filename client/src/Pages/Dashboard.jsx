@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+// REMOVE Footer from here
+import { AuthContext } from '../context/AuthContext'; 
 
 // Role-based dashboards
 import StudentDashboard from '@/components/Dashboard/StudentDashboard.jsx';
@@ -9,7 +9,7 @@ import InstructorDashboard from '@/components/Dashboard/InstructorDashboard.jsx'
 import AdminDashboard from '@/components/Dashboard/AdminDashboard.jsx';
 
 const Dashboard = () => {
-  const { user, loading } = useContext(AuthContext); // Get user and loading state from context
+  const { user, loading } = useContext(AuthContext); 
 
   const renderDashboard = () => {
     if (!user) return <div className="text-center text-red-500 mt-10">Unauthorized. Please log in.</div>;
@@ -28,13 +28,14 @@ const Dashboard = () => {
 
   return (
     <>
-      
+    <Navbar/>
+      {/* avbar is already global in App.jsx, but if you need it here, keep it. */}
       {loading ? (
         <div className="text-center mt-10 text-white">Loading dashboard...</div>
       ) : (
         renderDashboard()
       )}
-      
+     
     </>
   );
 };

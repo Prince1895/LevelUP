@@ -7,10 +7,12 @@ import MarketplaceSection from '@/components/MarketPlaceSection';
 import SuccessStoriesSection from '@/components/SuccessStoriesSection';
 import UpcomingEventsSection from '@/components/UpcomingEventsSection';
 import BookSessionSection from '@/components/BookSessionSection';
+import Navbar from '@/components/Navbar';
 
 const Home= () => {
   return (
     <>
+    <Navbar/>
       <Hero/>
       <CourseSection/>
       <MarketplaceSection/>

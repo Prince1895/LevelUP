@@ -1,19 +1,26 @@
 // components/Sidebar.js
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const Sidebar = ({ links }) => {
+  const activeLinkStyle = {
+    backgroundColor: '#4f46e5', // indigo-600
+    color: 'white',
+  };
+
   return (
-    <div className="w-64 min-h-screen bg-[#111] text-white fixed -z-10 top-0 left-0 p-6 pt-20 space-y-4 shadow-lg">
-      <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
+    <div className="w-64 h-screen bg-[#111] text-white fixed top-0 left-0 p-6 space-y-4 shadow-lg pt-24 ">
+      <h2 className="text-2xl font-bold mb-6 px-3">Dashboard</h2>
       <ul className="space-y-3">
         {links.map((link) => (
           <li key={link.path}>
-            <Link
+            <NavLink
               to={link.path}
-              className="block px-3 py-2 rounded hover:bg-gray-800 transition"
+              style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}
+              className="flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 hover:outline hover:outline-2 hover:outline-indigo-400"
             >
-              {link.label}
-            </Link>
+              <span className="text-xl">{link.icon}</span>
+              <span>{link.label}</span>
+            </NavLink>
           </li>
         ))}
       </ul>

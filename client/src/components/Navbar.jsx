@@ -50,13 +50,14 @@ const Navbar = () => { // Remove the user and onLogout props
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/courses">Courses</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/my-learning">My Learning</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/certificates">Certificates</a></li>
-          <li className="relative group">
-            <button className="group-hover:text-indigo-400 text-white">Profile ▼</button>
-            <ul className="absolute hidden group-hover:block bg-[#1a1a1a] border border-gray-700 shadow-lg mt-2 p-2 rounded-lg w-40 right-0">
-              <li><a href="/profile" className="block px-4 py-2 text-white hover:bg-gray-700 rounded">My Profile</a></li>
-              <li><button onClick={logout} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700 rounded">Logout</button></li>
-            </ul>
-          </li>
+          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/profile">My Profile</a></li>
+         <li>
+    <button 
+        onClick={() => { logout(); navigate('/'); }} 
+        className="w-full text-left  text-red-500 hover:bg-gray-700 transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2  ">
+        Logout
+    </button>
+</li>
         </>
       );
     }
@@ -68,13 +69,14 @@ const Navbar = () => { // Remove the user and onLogout props
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/instructor/courses">My Courses</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/instructor/create">Create Course</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/instructor/earnings">Earnings</a></li>
-          <li className="relative group">
-            <button className="group-hover:text-indigo-400 text-white">Profile ▼</button>
-            <ul className="absolute hidden group-hover:block bg-[#1a1a1a] border border-gray-700 shadow-lg mt-2 p-2 rounded-lg w-40 right-0">
-              <li><a href="/profile" className="block px-4 py-2 text-white hover:bg-gray-700 rounded">My Profile</a></li>
-              <li><button onClick={logout} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700 rounded">Logout</button></li>
-            </ul>
-          </li>
+         <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/profile">My Profile</a></li>
+          <li>
+    <button 
+        onClick={() => { logout(); navigate('/'); }} 
+        className="w-full text-left  text-red-500 hover:bg-gray-700 transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2">
+        Logout
+    </button>
+</li>
         </>
       );
     }
@@ -82,17 +84,18 @@ const Navbar = () => { // Remove the user and onLogout props
     if (user.role === 'admin') {
       return (
         <>
-          <li><a href="/admin">Admin Panel</a></li>
-          <li><a href="/admin/users">Users</a></li>
-          <li><a href="/admin/approvals">Approvals</a></li>
-          <li><a href="/admin/reports">Reports</a></li>
-          <li className="relative group">
-            <button className="group-hover:text-indigo-400 text-white">Profile </button>
-            <ul className="absolute hidden group-hover:block bg-[#1a1a1a] border border-gray-700 shadow-lg mt-2 p-2 rounded-lg w-40 right-0">
-              <li><a href="/profile" className="block px-4 py-2 text-white hover:bg-gray-700 rounded">My Profile</a></li>
-              <li><button onClick={logout} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-700 rounded">Logout</button></li>
-            </ul>
-          </li>
+          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin">Admin Panel</a></li>
+          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/users">Users</a></li>
+          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/approvals">Approvals</a></li>
+          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/reports">Reports</a></li>
+          <li   className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/profile">My Profile</a></li>
+           <li>
+    <button 
+        onClick={() => { logout(); navigate('/'); }} 
+        className="w-full text-left  text-red-500 hover:bg-gray-700 transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2">
+        Logout
+    </button>
+</li>
         </>
       );
     }
@@ -100,16 +103,14 @@ const Navbar = () => { // Remove the user and onLogout props
     return null;
   };
 
-  return (
-    <nav className={`
-  fixed left-1/2 transform -translate-x-1/2
-  transition-all duration-300 ease-in-out
-  z-50 backdrop-blur-lg
-  ${scrolled
-        ? `top-5 rounded-xl bg-white/10 shadow-lg 
-       w-full max-w-7xl mx-auto px-4 py-3`
-        : 'top-0 w-full bg-[black] px-4 py-4'}
-`}>
+return (
+  <nav
+    className={`fixed left-1/2 transform -translate-x-1/2 transition-all duration-300 ease-in-out z-50 backdrop-blur-lg ${
+      scrolled
+        ? "top-5 rounded-xl bg-white/10 shadow-lg w-full max-w-7xl mx-auto px-4 py-3"
+        : "top-0 w-full bg-[black] px-4 py-4"
+    }`}
+  >
 
       <div className="max-w-full flex justify-between items-center">
         <div>

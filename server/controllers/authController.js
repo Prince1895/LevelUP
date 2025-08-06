@@ -137,7 +137,12 @@ export const getMe = async (req, res) => {
 };
 
 // Logout a user (clear cookie)
-export const logoutUser = async (req, res) => {
-  res.clearCookie('token', cookieOptions);
+// Logout a user (clear cookie)
+export const logoutUser = (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
   return res.status(200).json({ message: 'Logged out successfully' });
 };
