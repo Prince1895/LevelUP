@@ -2,19 +2,26 @@ import React, { useEffect, useState, useContext } from 'react'; // Import useCon
 import { HiMenu, HiX } from 'react-icons/hi';
 import MagneticButton from "@/components/ui/magnetic-button";
 import logo from "@/assets/logo.png";
-import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom'; // Import AuthContext
 
 const Navbar = () => { // Remove the user and onLogout props
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useContext(AuthContext); // Get user and logout from context
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
+    
+    
+const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   const renderLinks = () => {
     if (!user) {
       return (
@@ -52,11 +59,12 @@ const Navbar = () => { // Remove the user and onLogout props
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/certificates">Certificates</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/profile">My Profile</a></li>
          <li>
-    <button 
-        onClick={() => { logout(); navigate('/'); }} 
-        className="w-full text-left  text-red-500 hover:bg-gray-700 transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2  ">
-        Logout
-    </button>
+ <button onClick={handleLogout} className="px-4 py-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition">
+  
+    Logout
+  </button>
+
+
 </li>
         </>
       );
@@ -71,11 +79,11 @@ const Navbar = () => { // Remove the user and onLogout props
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/instructor/earnings">Earnings</a></li>
          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/profile">My Profile</a></li>
           <li>
-    <button 
-        onClick={() => { logout(); navigate('/'); }} 
-        className="w-full text-left  text-red-500 hover:bg-gray-700 transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2">
-        Logout
-    </button>
+    <button onClick={handleLogout} className="px-4 py-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition">
+  
+    Logout
+  </button>
+
 </li>
         </>
       );
@@ -90,11 +98,11 @@ const Navbar = () => { // Remove the user and onLogout props
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/admin/reports">Reports</a></li>
           <li   className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/profile">My Profile</a></li>
            <li>
-    <button 
-        onClick={() => { logout(); navigate('/'); }} 
-        className="w-full text-left  text-red-500 hover:bg-gray-700 transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2">
-        Logout
-    </button>
+   <button onClick={handleLogout} className="px-4 py-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition">
+  
+    Logout
+  </button>
+
 </li>
         </>
       );

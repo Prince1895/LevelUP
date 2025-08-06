@@ -5,12 +5,13 @@ import {
     createCourse, 
     updateCourses, 
     deleteCourse,
-    getInstructorCourses // Import the new controller function
+    getInstructorCourses
 } from "../controllers/courseController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRole } from "../middlewares/roleMiddleware.js";
 import { checkEnrollment } from "../middlewares/checkEnrollmentmiddleware.js";
 import { getLessonsForCourse, getQuizzesForCourse } from "../controllers/courseContentController.js";
+import upload from "../config/multer.js"; // Import the multer config
 
 const courseRoutes = express.Router();
 
@@ -19,8 +20,9 @@ courseRoutes.get("/all", getAllCourses);
 courseRoutes.get("/by-id/:id", getCourseById);
 
 // --- Instructor/Admin Routes ---
-courseRoutes.post("/create", authMiddleware, requireRole("instructor"), createCourse);
-courseRoutes.put("/update/:id", authMiddleware, requireRole("instructor", "admin"), updateCourses);
+// Use the upload middleware here to handle the image file
+courseRoutes.post("/create", authMiddleware, requireRole("instructor"), upload.single('image'), createCourse);
+courseRoutes.put("/update/:id", authMiddleware, requireRole("instructor", "admin"), upload.single('image'), updateCourses);
 courseRoutes.delete("/delete/:id", authMiddleware, requireRole("instructor", "admin"), deleteCourse);
 
 // NEW: Route for an instructor to get their own courses

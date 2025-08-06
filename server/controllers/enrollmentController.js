@@ -28,31 +28,6 @@ export const enrollFreeCourse = async (req, res) => {
   }
 };
 
-// ✅ Create Razorpay Order
-export const createRazorpayOrder = async (req, res) => {
-  const { courseId } = req.params;
-  const userId = req.user._id;
-
-  try {
-    const course = await Course.findById(courseId);
-    if (!course) return res.status(404).json({ message: "Course not found" });
-    if (course.price === 0) return res.status(400).json({ message: "This is a free course" });
-
-    const existing = await Enrollment.findOne({ user: userId, course: courseId });
-    if (existing) return res.status(400).json({ message: "Already enrolled" });
-
-    const options = {
-      amount: course.price * 100, // amount in paise
-      currency: "INR",
-      receipt: `receipt_course_${courseId}_${Date.now()}`,
-    };
-
-    const order = await razorpay.orders.create(options);
-    res.status(200).json({ order });
-  } catch (error) {
-    res.status(500).json({ message: "Error creating order", error: error.message });
-  }
-};
 
 // ✅ Verify Payment & Enroll
 export const verifyPaymentAndEnroll = async (req, res) => {

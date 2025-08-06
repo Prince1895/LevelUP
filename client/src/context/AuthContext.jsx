@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     // Clear user data and token
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    
 
     // Clear the user from state
     setUser(null);

@@ -1,8 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '@/api/axios';
 import { AuthContext } from '@/context/AuthContext';
-import { FiBook, FiPlusSquare, FiDollarSign, FiUser, FiPlus, FiTrash2, FiX, FiCheckSquare, FiSquare } from "react-icons/fi";
+import { FiBook, FiPlusSquare, FiDollarSign, FiUser, FiPlus, FiTrash2, FiX, FiCheckSquare, FiSquare, FiUpload } from "react-icons/fi";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import Navbar from '../Navbar';
@@ -26,12 +26,11 @@ const QuizModal = ({ courseId, lessonId, onClose, onQuizCreated }) => {
     
     const handleCorrectOptionChange = (qIndex, oIndex) => {
         const newQuestions = [...questions];
-        // For single choice, unselect other options
         if (newQuestions[qIndex].type === 'mcq-single') {
             newQuestions[qIndex].options.forEach((opt, idx) => {
                 opt.isCorrect = idx === oIndex;
             });
-        } else { // For multiple choice, just toggle
+        } else {
             newQuestions[qIndex].options[oIndex].isCorrect = !newQuestions[qIndex].options[oIndex].isCorrect;
         }
         setQuestions(newQuestions);
@@ -83,7 +82,13 @@ const QuizModal = ({ courseId, lessonId, onClose, onQuizCreated }) => {
                         <div key={qIndex} className="bg-[#111] p-4 rounded-lg border border-gray-800 space-y-3">
                             <div className="flex justify-between items-center">
                                 <h3 className="font-semibold">Question {qIndex + 1}</h3>
-                                <button type="button" onClick={() => removeQuestion(qIndex)} className="text-red-500"><FiTrash2 /></button>
+                                <div className="flex items-center gap-4">
+                                    <select value={q.type} onChange={(e) => handleQuestionChange(qIndex, 'type', e.target.value)} className="bg-neutral-800 text-xs p-1 rounded-md border border-neutral-700">
+                                        <option value="mcq-single">Single Choice</option>
+                                        <option value="mcq-multiple">Multiple Choice</option>
+                                    </select>
+                                    <button type="button" onClick={() => removeQuestion(qIndex)} className="text-red-500"><FiTrash2 /></button>
+                                </div>
                             </div>
                             <textarea value={q.questionText} onChange={(e) => handleQuestionChange(qIndex, 'questionText', e.target.value)} placeholder="Question Text" className="w-full bg-neutral-800 p-2 rounded-md border border-neutral-700" required />
                             
@@ -118,18 +123,20 @@ const CreateCourse = () => {
     const navigate = useNavigate();
     const [course, setCourse] = useState(null);
     const [lessons, setLessons] = useState([]);
-    const [quizzes, setQuizzes] = useState({}); // { lessonId: [quiz1, quiz2] }
+    const [quizzes, setQuizzes] = useState({});
 
     const [activeTab, setActiveTab] = useState('details');
     const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
     const [currentLessonForQuiz, setCurrentLessonForQuiz] = useState(null);
 
     const [courseDetails, setCourseDetails] = useState({
-        title: '', description: '', category: '', price: 0, duration: '', level: 'beginner', image: '', published: false
+        title: '', description: '', category: '', price: 0, duration: '', level: 'beginner', tags: '', published: false
     });
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
 
     const [lessonDetails, setLessonDetails] = useState({
-        title: '', content: '', videoUrl: '', duration: ''
+        title: '', content: '', videoUrl: '', duration: '', resources: [{ name: '', type: '', url: '' }]
     });
 
     const instructorLinks = [
@@ -145,15 +152,60 @@ const CreateCourse = () => {
         setCourseDetails(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+    
+    useEffect(() => {
+        // Cleanup the object URL to avoid memory leaks
+        return () => {
+            if (imagePreview) {
+                URL.revokeObjectURL(imagePreview);
+            }
+        };
+    }, [imagePreview]);
+
     const handleLessonChange = (e) => {
         const { name, value } = e.target;
         setLessonDetails(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleResourceChange = (index, e) => {
+        const { name, value } = e.target;
+        const newResources = [...lessonDetails.resources];
+        newResources[index][name] = value;
+        setLessonDetails(prev => ({ ...prev, resources: newResources }));
+    };
+
+    const addResource = () => {
+        setLessonDetails(prev => ({ ...prev, resources: [...prev.resources, { name: '', type: '', url: '' }] }));
+    };
+
+    const removeResource = (index) => {
+        const newResources = lessonDetails.resources.filter((_, i) => i !== index);
+        setLessonDetails(prev => ({ ...prev, resources: newResources }));
+    };
+
     const handleCreateCourse = async (e) => {
         e.preventDefault();
+        const formData = new FormData();
+        Object.keys(courseDetails).forEach(key => {
+            formData.append(key, courseDetails[key]);
+        });
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
         try {
-            const response = await API.post('/course/create', courseDetails);
+            const response = await API.post('/course/create', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             setCourse(response.data.course);
             setActiveTab('lessons');
         } catch (error) {
@@ -169,7 +221,7 @@ const CreateCourse = () => {
             const newLesson = response.data.lesson;
             setLessons([...lessons, newLesson]);
             setQuizzes(prev => ({...prev, [newLesson._id]: []}));
-            setLessonDetails({ title: '', content: '', videoUrl: '', duration: '' });
+            setLessonDetails({ title: '', content: '', videoUrl: '', duration: '', resources: [{ name: '', type: '', url: '' }] });
         } catch (error) {
             console.error("Failed to add lesson:", error);
         }
@@ -204,12 +256,19 @@ const CreateCourse = () => {
 
                             {activeTab === 'details' && (
                                 <form onSubmit={handleCreateCourse} className="space-y-4">
-                                    {/* Course Details Form Inputs */}
                                     <input type="text" name="title" value={courseDetails.title} onChange={handleCourseChange} placeholder="Course Title" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
                                     <textarea name="description" value={courseDetails.description} onChange={handleCourseChange} placeholder="Course Description" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700 h-24" required />
                                     <div className="grid grid-cols-2 gap-4">
-                                        <input type="text" name="category" value={courseDetails.category} onChange={handleCourseChange} placeholder="Category" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
-                                        <input type="number" name="price" value={courseDetails.price} onChange={handleCourseChange} placeholder="Price (USD)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
+                                        <select name="category" value={courseDetails.category} onChange={handleCourseChange} className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required>
+                                            <option value="" disabled>Select a category</option>
+                                            <option value="Web Development">Web Development</option>
+                                            <option value="Data Science">Data Science</option>
+                                            <option value="UI/UX Design">UI/UX Design</option>
+                                            <option value="Business">Business</option>
+                                            <option value="Marketing">Marketing</option>
+                                            <option value="Technical">Technical</option>
+                                        </select>
+                                        <input type="number" name="price" value={courseDetails.price} onChange={handleCourseChange} placeholder="Price (INR)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <input type="text" name="duration" value={courseDetails.duration} onChange={handleCourseChange} placeholder="Duration (e.g., 8 hours)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
@@ -219,7 +278,16 @@ const CreateCourse = () => {
                                             <option value="advanced">Advanced</option>
                                         </select>
                                     </div>
-                                    <input type="text" name="image" value={courseDetails.image} onChange={handleCourseChange} placeholder="Image URL" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" />
+                                    <div>
+                                        <label htmlFor="image" className="block text-sm mb-1 text-neutral-300">Course Thumbnail</label>
+                                        <input type="file" name="image" id="image" onChange={handleImageChange} className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                                        {imagePreview && (
+                                            <div className="mt-4">
+                                                <img src={imagePreview} alt="Thumbnail Preview" className="w-full max-w-xs h-auto rounded-lg" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <input type="text" name="tags" value={courseDetails.tags} onChange={handleCourseChange} placeholder="Tags (comma-separated, e.g., react, nodejs)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" />
                                     <div className="flex items-center gap-3">
                                         <input type="checkbox" name="published" checked={courseDetails.published} onChange={handleCourseChange} id="published" className="h-5 w-5" />
                                         <label htmlFor="published">Publish this course?</label>
@@ -236,6 +304,20 @@ const CreateCourse = () => {
                                         <textarea name="content" value={lessonDetails.content} onChange={handleLessonChange} placeholder="Lesson Content" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700 h-24" required />
                                         <input type="text" name="videoUrl" value={lessonDetails.videoUrl} onChange={handleLessonChange} placeholder="Video URL" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" />
                                         <input type="text" name="duration" value={lessonDetails.duration} onChange={handleLessonChange} placeholder="Duration (e.g., 15 mins)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" />
+                                        
+                                        <div>
+                                            <h3 className="text-lg font-semibold mb-2">Resources</h3>
+                                            {lessonDetails.resources.map((res, index) => (
+                                                <div key={index} className="flex items-center gap-2 mb-2">
+                                                    <input type="text" name="name" value={res.name} onChange={(e) => handleResourceChange(index, e)} placeholder="Resource Name" className="w-1/3 bg-neutral-800 p-2 rounded-md border border-neutral-700" />
+                                                    <input type="text" name="type" value={res.type} onChange={(e) => handleResourceChange(index, e)} placeholder="Type (e.g., PDF)" className="w-1/3 bg-neutral-800 p-2 rounded-md border border-neutral-700" />
+                                                    <input type="text" name="url" value={res.url} onChange={(e) => handleResourceChange(index, e)} placeholder="URL" className="w-1/3 bg-neutral-800 p-2 rounded-md border border-neutral-700" />
+                                                    <button type="button" onClick={() => removeResource(index)} className="text-red-500"><FiTrash2 /></button>
+                                                </div>
+                                            ))}
+                                            <button type="button" onClick={addResource} className="text-sm text-indigo-400 flex items-center gap-1"><FiPlus/> Add Resource</button>
+                                        </div>
+
                                         <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 transition flex items-center gap-2"><FiPlus /> Add Lesson</button>
                                     </form>
                                     <div>

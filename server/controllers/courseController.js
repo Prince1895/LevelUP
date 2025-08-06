@@ -69,16 +69,22 @@ export const getCourseById = async (req, res) => {
 //create a new course
 export const createCourse = async (req, res) => {
   try {
-    const { title, description, category, price, duration, published, image } = req.body;
+    const { title, description, category, price, duration, published, level, tags } = req.body;
+    
+    // Get the image URL from the uploaded file's path
+    const imageUrl = req.file ? req.file.path : '';
+
     const newCourse = new Course({
       title,
       description,
       category,
       price,
       duration,
-      image,
-      instructor: req.user._id, // The user ID is now directly available
+      image: imageUrl,
+      instructor: req.user._id,
       published,
+      level,
+      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
     });
 
     const savedCourse = await newCourse.save();
@@ -98,26 +104,21 @@ export const getInstructorCourses = async (req, res) => {
   try {
     const instructorId = req.user._id;
 
-    // Use MongoDB aggregation to fetch courses and their student counts efficiently
     const courses = await Course.aggregate([
-      // Match courses by the instructor's ID
       { $match: { instructor: instructorId } },
-      // Perform a lookup to the enrollments collection
       {
         $lookup: {
-          from: 'enrollments', // the name of the enrollments collection in your DB
+          from: 'enrollments',
           localField: '_id',
           foreignField: 'course',
           as: 'enrollmentData'
         }
       },
-      // Add a new field 'studentCount' which is the size of the enrollmentData array
       {
         $addFields: {
           studentCount: { $size: '$enrollmentData' }
         }
       },
-      // Project only the fields you need, removing the large enrollmentData array
       {
         $project: {
           title: 1,
@@ -128,7 +129,6 @@ export const getInstructorCourses = async (req, res) => {
           createdAt: 1,
         }
       },
-      // Sort by creation date
       { $sort: { createdAt: -1 } }
     ]);
 
@@ -146,38 +146,36 @@ export const getInstructorCourses = async (req, res) => {
 //update the course
 export const updateCourses = async (req, res) => {
   try {
-    console.log("update course");
     const { id } = req.params;
-    console.log("id", id);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid course ID format" });
     }
 
     const course = await Course.findById(id);
-
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
     const userId = req.user._id.toString();
     const userRole = req.user.role;
-    console.log("User ID from token:", userId.toString());
-    console.log("Course instructor ID:", course.instructor?.toString());
-    console.log("User role:", userRole);
-    if (userRole !== "admin" && (!course.instructor || course.instructor.toString() !== userId)) {
+    if (userRole !== "admin" && course.instructor.toString() !== userId) {
       return res.status(403).json({ message: "Unauthorized to update this course" });
     }
 
-    const { title, description, category, price, duration, image, published } = req.body;
+    const { title, description, category, price, duration, published, level, tags } = req.body;
 
     if (title !== undefined) course.title = title;
     if (description !== undefined) course.description = description;
     if (category !== undefined) course.category = category;
     if (price !== undefined) course.price = price;
     if (duration !== undefined) course.duration = duration;
-    if (image !== undefined) course.image = image;
     if (published !== undefined) course.published = published;
+    if (level !== undefined) course.level = level;
+    if (tags !== undefined) course.tags = tags.split(',').map(tag => tag.trim());
+    if (req.file) {
+        course.image = req.file.path;
+    }
 
     const updated = await course.save();
 
@@ -196,24 +194,19 @@ export const updateCourses = async (req, res) => {
 export const deleteCourse = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("id", id);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid course ID format" });
     }
 
     const course = await Course.findById(id);
-
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
 
     const userId = req.user._id.toString();
     const userRole = req.user.role;
-    console.log("User ID from token:", userId.toString());
-    console.log("Course instructor ID:", course.instructor?.toString());
-    console.log("User role:", userRole);
-    if (userRole !== "admin" && (!course.instructor || course.instructor.toString() !== userId)) {
+    if (userRole !== "admin" && course.instructor.toString() !== userId) {
       return res.status(403).json({ message: "Unauthorized to update this course" });
     }
 

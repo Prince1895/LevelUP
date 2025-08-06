@@ -5,14 +5,14 @@ import { AuthContext } from "@/context/AuthContext";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
-import { FiX, FiClock, FiBarChart2, FiStar, FiUsers, FiBookOpen, FiAward, FiUser, FiSettings } from 'react-icons/fi';
+import { FiX, FiClock, FiBarChart2, FiStar, FiUsers, FiBookOpen, FiAward, FiUser, FiSettings, FiSearch } from 'react-icons/fi';
 
 // --- Course Detail Modal ---
 const CourseDetailModal = ({ course, onClose, onEnroll }) => {
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div className="bg-[#1a1a1a] p-8 rounded-lg w-full max-w-4xl border border-gray-700 max-h-[90vh] overflow-y-auto relative">
-                <button onClick={onClose} className="absolute top-4 text-white right-4 text-2xl hover:text-red-500"><FiX /></button>
+                <button onClick={onClose} className="absolute top-4 right-4 text-2xl hover:text-red-500"><FiX /></button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <img src={course.image || 'https://placehold.co/600x400/1a1a1a/FFF?text=Course'} alt={course.title} className="w-full h-auto object-cover rounded-lg mb-4"/>
@@ -26,7 +26,7 @@ const CourseDetailModal = ({ course, onClose, onEnroll }) => {
                         </div>
                         <p className="text-gray-300">{course.description}</p>
                     </div>
-                    <div className="bg-[#111] text-white p-6 rounded-lg">
+                    <div className="bg-[#111] p-6 rounded-lg">
                         <h2 className="text-2xl font-bold mb-4">What you'll learn</h2>
                         <ul className="list-disc pl-5 space-y-2 text-gray-300">
                             <li>Master the fundamentals of {course.category}</li>
@@ -35,7 +35,7 @@ const CourseDetailModal = ({ course, onClose, onEnroll }) => {
                             <li>Prepare for a career in the field</li>
                         </ul>
                         <div className="mt-8">
-                            <h3 className="text-xl font-bold mb-2">Price: ${course.price.toFixed(2)}</h3>
+                            <h3 className="text-xl font-bold mb-2">Price: &#x20B9;{course.price.toFixed(2)}</h3>
                             <button onClick={() => onEnroll(course)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition">
                                 {course.price === 0 ? 'Enroll for Free' : 'Enroll Now'}
                             </button>
@@ -51,8 +51,10 @@ const CourseDetailModal = ({ course, onClose, onEnroll }) => {
 // --- Main Student Courses Page Component ---
 const StudentCourses = () => {
     const [courses, setCourses] = useState([]);
+    const [filteredCourses, setFilteredCourses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCourse, setSelectedCourse] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -70,6 +72,7 @@ const StudentCourses = () => {
             try {
                 const response = await API.get('/course/all');
                 setCourses(response.data.courses);
+                setFilteredCourses(response.data.courses);
             } catch (error) {
                 console.error("Failed to fetch courses:", error);
             } finally {
@@ -78,6 +81,15 @@ const StudentCourses = () => {
         };
         fetchCourses();
     }, []);
+
+    useEffect(() => {
+        const results = courses.filter(course =>
+            course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            course.instructor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            course.category.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredCourses(results);
+    }, [searchTerm, courses]);
 
     const handleEnroll = async (course) => {
         if (!user) {
@@ -90,9 +102,35 @@ const StudentCourses = () => {
                 await API.post(`/enrollment/free/${course._id}`);
                 alert("Successfully enrolled for free!");
             } else {
-                const response = await API.post(`/enrollment/paid/${course._id}/create-order`);
+                const response = await API.post(`/enroll/create-order`, { courseId: course._id });
                 const { order } = response.data;
-                alert(`Redirecting to payment for order: ${order.id}`);
+                
+                const options = {
+                    key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                    amount: order.amount,
+                    currency: order.currency,
+                    name: "SkillSphere",
+                    description: `Enrollment for ${course.title}`,
+                    order_id: order.id,
+                    handler: async function (response) {
+                        await API.post(`/enroll/confirm-payment`, {
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                            courseId: course._id
+                        });
+                        alert("Payment successful! You are now enrolled.");
+                    },
+                    prefill: {
+                        name: user.name,
+                        email: user.email,
+                    },
+                    theme: {
+                        color: "#3399cc"
+                    }
+                };
+                const rzp = new window.Razorpay(options);
+                rzp.open();
             }
             setSelectedCourse(null);
         } catch (error) {
@@ -106,10 +144,22 @@ const StudentCourses = () => {
             <div className="ml-64 w-full flex flex-col min-h-screen">
                 <Navbar />
                 <main className="flex-grow bg-[#1a1a1a] text-white p-10">
-                    <h1 className="text-3xl font-semibold mb-8 pt-10">Browse Courses</h1>
+                    <div className="flex justify-between items-center mb-8 pt-10">
+                        <h1 className="text-3xl font-semibold">Browse Courses</h1>
+                        <div className="relative">
+                            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search courses..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="bg-neutral-800 border border-neutral-700 rounded-md pl-10 pr-4 py-2 text-sm w-64"
+                            />
+                        </div>
+                    </div>
                     {isLoading ? <p className="text-center">Loading courses...</p> : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {courses.map(course => (
+                            {filteredCourses.map(course => (
                                 <div key={course._id} onClick={() => setSelectedCourse(course)} className="cursor-pointer bg-[#111] border border-gray-800 rounded-lg shadow-lg hover:border-indigo-500 transition-all duration-300 flex flex-col">
                                     <img src={course.image || 'https://placehold.co/600x400/1a1a1a/FFF?text=Course'} alt={course.title} className="w-full h-48 object-cover rounded-t-lg"/>
                                     <div className="p-6 flex flex-col flex-grow">
@@ -121,7 +171,7 @@ const StudentCourses = () => {
                                             <span className="capitalize">{course.level}</span>
                                         </div>
                                         <div className="flex justify-between items-center mt-4">
-                                            <p className="text-lg font-bold text-indigo-400">${course.price.toFixed(2)}</p>
+                                            <p className="text-lg font-bold text-indigo-400">&#x20B9;{course.price.toFixed(2)}</p>
                                             <span className="text-xs bg-gray-700 px-2 py-1 rounded-full">{course.category}</span>
                                         </div>
                                     </div>

@@ -1,7 +1,7 @@
 import express from "express";
 import {
   enrollFreeCourse,
-  createRazorpayOrder,
+ 
   verifyPaymentAndEnroll,
   getMyEnrollments,
   getAllEnrollments, // Admin only
@@ -15,7 +15,7 @@ const enrollmentRoutes = express.Router();
 
 // Student Routes
 enrollmentRoutes.post("/free/:courseId", authMiddleware, enrollFreeCourse);
-enrollmentRoutes.post("/paid/:courseId/create-order", authMiddleware, createRazorpayOrder);
+
 enrollmentRoutes.post("/paid/verify", authMiddleware, verifyPaymentAndEnroll);
 enrollmentRoutes.get("/my", authMiddleware, getMyEnrollments);
 

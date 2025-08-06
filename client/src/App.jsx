@@ -17,6 +17,7 @@ import UserManagement from "./components/Dashboard/UserManagement";
 import InstructorApprovals from "./components/Dashboard/InstructorApprovals";
 import AdminReports from "./components/Dashboard/AdminReports";
 import StudentCourses from "./components/Dashboard/StudentCourses";
+import Certificates from "./components/Dashboard/Certificates";
 
 const App = () => {
   return (
@@ -42,8 +43,10 @@ const App = () => {
         <Route path="/admin/approvals" element={<InstructorApprovals />} />
         <Route path="/admin/reports" element={<AdminReports />} />
 
+
         {/*Student Routes*/}
         <Route path="/student/courses" element={<StudentCourses/>}/>
+        <Route path="/student/certificates" element={<Certificates />} />
         
       </Routes>
     </>
