@@ -3,7 +3,7 @@ import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import API from '../api/axios'; // <-- Axios instance
+import axios from 'axios';
 
 function Loginpage() {
   const [email, setEmail] = useState('');
@@ -23,16 +23,24 @@ function Loginpage() {
     setIsSubmitting(true);
 
     try {
-      const res = await API.post('/auth/login', { email, password });
-      const { user, token } = res.data;
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, password }),
+});
 
-      login(user, token);
-      toast.success("Login successful!");
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('Login failed:', err);
-      const message = err?.response?.data?.message || "Login failed. Please check credentials.";
-      toast.error(message);
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Login successful!");
+        login(data.user, data.token);
+        navigate('/dashboard');
+      } else {
+        toast.error(data.message || "Invalid credentials");
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
