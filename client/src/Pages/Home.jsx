@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 import Hero from '@/components/Hero';
 import InstructorSection from '@/components/InstructorSection';
 import CourseSection from '@/components/CourseSection';
-import MarketplaceSection from '@/components/MarketPlaceSection';
+import MarketplaceSection from '@/components/MarketplaceSection';
 import SuccessStoriesSection from '@/components/SuccessStoriesSection';
 import UpcomingEventsSection from '@/components/UpcomingEventsSection';
 import BookSessionSection from '@/components/BookSessionSection';
