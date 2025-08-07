@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Lesson from "../models/Lesson.js";
 import Course from "../models/Course.js";
 import fs from 'fs';
-import imagekit from '../config/imageKit.js'; // Correctly import the initialized instance
+import imagekit from '../config/imagekit.js'; // Correctly import the initialized instance
 
 //create lessons for course
 export const createLesson = async (req, res) => {
