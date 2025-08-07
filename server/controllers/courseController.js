@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Course from "../models/Course.js";
 import User from "../models/User.js";
-import imagekit from '../config/imageKit.js';
+import imagekit from '../config/imagekit.js';
 import fs from 'fs';
 
 // Get all courses with pagination, filtering by category or instructor
