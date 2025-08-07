@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
 import Course from "../models/Course.js";
 import User from "../models/User.js";
+import imagekit from '../config/imageKit.js';
+import fs from 'fs';
 
-//get all courses
+// Get all courses with pagination, filtering by category or instructor
 export const getAllCourses = async (req, res) => {
   try {
     const { category, instructor, page = 1, limit = 10 } = req.query;
-
-  const filter = { published: true }; 
+    const filter = { published: true }; 
     if (category) filter.category = category;
     if (instructor) filter.instructor = instructor;
 
@@ -19,25 +20,20 @@ export const getAllCourses = async (req, res) => {
 
     const total = await Course.countDocuments(filter);
 
-
     return res.status(200).json({
       message: "Get all courses successfully",
       total,
       page: parseInt(page),
       totalPages: Math.ceil(total / limit),
-  
       courses,
     });
   } catch (error) {
     console.error("Get all courses error:", error);
-    return res.status(500).json({ message: "Server error", 
-      error: error.message 
-    });
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-
-//get the course by id
+// Get a single course by ID
 export const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -47,8 +43,7 @@ export const getCourseById = async (req, res) => {
     }
 
     const course = await Course.findOne({ _id: id, published: true }).populate(
-      "instructor",
-      "name email"
+      "instructor", "name email"
     );
 
     if (!course) {
@@ -65,14 +60,36 @@ export const getCourseById = async (req, res) => {
   }
 };
 
-
-//create a new course
+// Create a new course
 export const createCourse = async (req, res) => {
   try {
+    const imageFile = req.file;
+
     const { title, description, category, price, duration, published, level, tags } = req.body;
-    
-    // Get the image URL from the uploaded file's path
-    const imageUrl = req.file ? req.file.path : '';
+
+    if (!title || !description || !category || !price || !duration || !level || !imageFile) {
+      return res.status(400).json({ message: "Please fill all required fields." });
+    }
+
+    const fileBuffer = fs.readFileSync(imageFile.path);
+
+    // Upload image to ImageKit
+    const response = await imagekit.upload({
+      file: fileBuffer,
+      fileName: imageFile.originalname,
+      folder: "/skillsphere_courses"
+    });
+
+    const optimizedImageUrl = imagekit.url({
+      path: response.filePath,
+      transformation: [
+        { quality: 'auto' },
+        { format: 'webp' },
+        { width: '1280' }
+      ]
+    });
+
+    const image = optimizedImageUrl;
 
     const newCourse = new Course({
       title,
@@ -80,11 +97,11 @@ export const createCourse = async (req, res) => {
       category,
       price,
       duration,
-      image: imageUrl,
+      image,
       instructor: req.user._id,
       published,
       level,
-      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+      tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
     });
 
     const savedCourse = await newCourse.save();
@@ -99,13 +116,13 @@ export const createCourse = async (req, res) => {
   }
 };
 
-// NEW: Get courses for the logged-in instructor
+// Get courses for the logged-in instructor
 export const getInstructorCourses = async (req, res) => {
   try {
     const instructorId = req.user._id;
 
     const courses = await Course.aggregate([
-      { $match: { instructor: instructorId } },
+      { $match: { instructor: new mongoose.Types.ObjectId(instructorId) } },
       {
         $lookup: {
           from: 'enrollments',
@@ -141,9 +158,8 @@ export const getInstructorCourses = async (req, res) => {
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-  
 
-//update the course
+// Update the course (including the image)
 export const updateCourses = async (req, res) => {
   try {
     const { id } = req.params;
@@ -172,9 +188,37 @@ export const updateCourses = async (req, res) => {
     if (duration !== undefined) course.duration = duration;
     if (published !== undefined) course.published = published;
     if (level !== undefined) course.level = level;
-    if (tags !== undefined) course.tags = tags.split(',').map(tag => tag.trim());
+    if (tags !== undefined) {
+      course.tags = tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+    }
+
+    // Handle image upload via ImageKit.io
     if (req.file) {
-        course.image = req.file.path;
+      const imagePath = req.file.path;
+
+      try {
+        // Upload image to ImageKit
+        const result = await imagekit.upload({
+          file: imagePath, 
+          fileName: req.file.originalname,
+          folder: '/course-images',
+          useUniqueFileName: true,
+           
+        });
+
+        // After uploading, you will get a URL from ImageKit
+        const imageUrl = result.url;
+
+        // Update the course's image field with the new image URL
+        course.image = imageUrl;
+
+        // Optionally, delete the uploaded file from the server after it's uploaded to ImageKit
+        fs.unlinkSync(imagePath);
+
+      } catch (uploadError) {
+        console.error("ImageKit upload error:", uploadError);
+        return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+      }
     }
 
     const updated = await course.save();
@@ -189,8 +233,7 @@ export const updateCourses = async (req, res) => {
   }
 };
 
-
-//delete the course
+// Delete a course
 export const deleteCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -207,7 +250,7 @@ export const deleteCourse = async (req, res) => {
     const userId = req.user._id.toString();
     const userRole = req.user.role;
     if (userRole !== "admin" && course.instructor.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorized to update this course" });
+      return res.status(403).json({ message: "Unauthorized to delete this course" });
     }
 
     await course.deleteOne();
@@ -216,9 +259,9 @@ export const deleteCourse = async (req, res) => {
       message: "Course deleted successfully",
       course,
     });
+  } catch (error) {
+    console.error("Delete course error:", error);
+    return res.status(500).
+    json({ message: "Server error", error: error.message });
   }
-    catch (error) {
-      console.error("Delete course error:", error);
-      return res.status(500).json({ message: "Server error", error: error.message });
-    }
-  };
+};

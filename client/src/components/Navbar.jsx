@@ -73,7 +73,7 @@ const handleLogout = () => {
     if (user.role === 'instructor') {
       return (
         <>
-          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/instructor/dashboard">Dashboard</a></li>
+          <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/dashboard">Dashboard</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/instructor/courses">My Courses</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/instructor/create">Create Course</a></li>
           <li className="transition-transform duration-300 ease-[cubic-bezier(0.4, 0, 0.2, 1)] hover:-translate-y-2"><a href="/instructor/earnings">Earnings</a></li>

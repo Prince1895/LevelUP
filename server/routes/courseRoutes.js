@@ -11,7 +11,7 @@ import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireRole } from "../middlewares/roleMiddleware.js";
 import { checkEnrollment } from "../middlewares/checkEnrollmentmiddleware.js";
 import { getLessonsForCourse, getQuizzesForCourse } from "../controllers/courseContentController.js";
-import upload from "../config/multer.js"; // Import the multer config
+import upload from '../middlewares/multer.js';
 
 const courseRoutes = express.Router();
 

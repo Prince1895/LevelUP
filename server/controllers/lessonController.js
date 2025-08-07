@@ -1,58 +1,83 @@
 import mongoose from "mongoose";
 import Lesson from "../models/Lesson.js";
 import Course from "../models/Course.js";
+import fs from 'fs';
+import imagekit from '../config/imageKit.js'; // Correctly import the initialized instance
 
-//create  lessons for course
+//create lessons for course
 export const createLesson = async (req, res) => {
     try {
-        const { title, content, videoUrl, duration,resources } = req.body;
-
+        const { title, content, duration, resources } = req.body;
         const { courseId } = req.params;
 
-        if (!title) {
-            return res.status(400).json({ message: "Title is required" });
+        if (!title || !content || !courseId) {
+            return res.status(400).json({ message: "Missing required fields" });
         }
-        if (!content) {
-            return res.status(400).json({ message: "Content is required" });
+
+        let videoUrl = '';
+        let thumbnailUrl = '';
+
+        // Upload video to ImageKit
+        if (req.files && req.files.video) {
+            const videoFile = req.files.video[0];
+            const videoBuffer = fs.readFileSync(videoFile.path);
+
+            const result = await imagekit.upload({
+                file: videoBuffer,
+                fileName: videoFile.originalname,
+                folder: "skillsphere_lessons",
+                resourceType: "video" ,// Specify resource type for videos
+                 transformation: [{ quality: "auto" }, { fetch_format: "auto" }] // Optimization for video
+                
+            });
+
+            videoUrl = result.url;
+            fs.unlinkSync(videoFile.path);
         }
-        if (!courseId) {
-            return res.status(400).json({ message: "Course ID is required" });
+
+        // Upload thumbnail to ImageKit
+        if (req.files && req.files.thumbnail) {
+            const thumbnailFile = req.files.thumbnail[0];
+            const thumbnailBuffer = fs.readFileSync(thumbnailFile.path);
+
+            const result = await imagekit.upload({
+                file: thumbnailBuffer,
+                fileName: thumbnailFile.originalname,
+                folder: "skillsphere_lesson_thumbnails",
+                transformation: [{ quality: "auto" }, { fetch_format: "auto" }, { width: 1280 }]
+            });
+
+            thumbnailUrl = result.url;
+            fs.unlinkSync(thumbnailFile.path);
         }
-        if (!videoUrl) {
-            return res.status(400).json({ message: "Video URL is required" });
-        }
-        if (!duration) {
-            return res.status(400).json({ message: "Duration is required" });
-        }
-        if (!mongoose.Types.ObjectId.isValid(courseId)) {
-            return res.status(400).json({ message: "Invalid course ID format" });
-        }
-        const course = await Course.findById(courseId);
-        if (!course) {
-            return res.status(404).json({ message: "Course not found" });
-        }
-        const userId = req.user._id;
-        if (req.user.role !== "admin" && course.instructor.toString() !== userId.toString()) {
-            return res.status(403).json({ message: "Unauthorized" });
-        }
+
         const newLesson = new Lesson({
             title,
             content,
             videoUrl,
+            thumbnail: thumbnailUrl,
             duration,
             course: courseId,
-            resources
+            resources: resources ? JSON.parse(resources) : []
         });
+
         const savedLesson = await newLesson.save();
-        course.lessons.push(newLesson._id);
+        const course = await Course.findById(courseId);
+
+        // Add this check to prevent the error
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        course.lessons.push(savedLesson._id);
         await course.save();
 
-        res.status(201).json({ message: "Lesson created",  course,lesson: savedLesson });
+        res.status(201).json({ message: "Lesson created", lesson: savedLesson });
     } catch (error) {
         console.error("Create lesson error:", error);
         return res.status(500).json({ message: "Server error", error: error.message });
     }
-}
+};
 
 // Get all lessons of a course by course Id
 export const getAllLessons = async (req, res) => {
@@ -142,6 +167,6 @@ export const deleteLesson = async (req, res) => {
     return res.status(200).json({ message: "Lesson deleted successfully", lesson });
   } catch (error) {
     console.error("Delete lesson error:", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };

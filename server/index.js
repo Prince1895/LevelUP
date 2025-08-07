@@ -1,5 +1,7 @@
-import express from "express";
 import dotenv from 'dotenv';
+dotenv.config(); // Moved to the top
+
+import express from "express";
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -15,7 +17,6 @@ import enrollmentRoutes from "./routes/enrollmentRoutes.js";
 import mongoose from 'mongoose';
 import router from "./routes/paymentRoutes.js";
 
-dotenv.config();
 mongoose.set("debug", true);
 connectDB(); 
 
@@ -40,14 +41,12 @@ const app = express();
   app.use(limiter);
 
   // 🌐 CORS
-
-
-app.use(cors({
-  origin: 'http://localhost:5173', // ✅ frontend URL
-  credentials: true,               // ✅ allow cookies
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+  app.use(cors({
+    origin: 'http://localhost:5173', // ✅ frontend URL
+    credentials: true,               // ✅ allow cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
 
 
   // 📡 Routes

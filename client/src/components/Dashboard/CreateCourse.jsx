@@ -69,7 +69,7 @@ const QuizModal = ({ courseId, lessonId, onClose, onQuizCreated }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 text-white bg-black/70 flex items-center justify-center z-50 p-4">
             <div className="bg-[#1a1a1a] p-8 rounded-lg w-full max-w-3xl border border-gray-700 max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">Create New Quiz</h2>
@@ -134,10 +134,16 @@ const CreateCourse = () => {
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     const [lessonDetails, setLessonDetails] = useState({
-        title: '', content: '', videoUrl: '', duration: '', resources: [{ name: '', type: '', url: '' }]
+        title: '', content: '', duration: '', resources: [{ name: '', type: '', url: '' }]
     });
+    const [videoFile, setVideoFile] = useState(null);
+    const [videoPreview, setVideoPreview] = useState(null);
+    const [thumbnailFile, setThumbnailFile] = useState(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState(null);
+    const [lessonUploadProgress, setLessonUploadProgress] = useState(0);
 
     const instructorLinks = [
         { label: "Dashboard", path: "/dashboard", icon: <FiBook /> },
@@ -161,17 +167,34 @@ const CreateCourse = () => {
     };
     
     useEffect(() => {
-        // Cleanup the object URL to avoid memory leaks
         return () => {
-            if (imagePreview) {
-                URL.revokeObjectURL(imagePreview);
-            }
+            if (imagePreview) URL.revokeObjectURL(imagePreview);
+            if (videoPreview) URL.revokeObjectURL(videoPreview);
+            if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
         };
-    }, [imagePreview]);
+    }, [imagePreview, videoPreview, thumbnailPreview]);
 
     const handleLessonChange = (e) => {
         const { name, value } = e.target;
         setLessonDetails(prev => ({ ...prev, [name]: value }));
+    };
+    
+    const handleVideoChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.size <= 100 * 1024 * 1024) { // 100MB limit
+            setVideoFile(file);
+            setVideoPreview(URL.createObjectURL(file));
+        } else if (file) {
+            alert("File size exceeds 100MB limit.");
+        }
+    };
+
+    const handleThumbnailChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setThumbnailFile(file);
+            setThumbnailPreview(URL.createObjectURL(file));
+        }
     };
 
     const handleResourceChange = (index, e) => {
@@ -204,26 +227,63 @@ const CreateCourse = () => {
             const response = await API.post('/course/create', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
                 }
             });
             setCourse(response.data.course);
             setActiveTab('lessons');
         } catch (error) {
             console.error("Failed to create course:", error);
+        } finally {
+            setUploadProgress(0);
         }
     };
 
     const handleAddLesson = async (e) => {
         e.preventDefault();
         if (!course) return;
+
+        const formData = new FormData();
+        Object.keys(lessonDetails).forEach(key => {
+            if (key === 'resources') {
+                formData.append(key, JSON.stringify(lessonDetails[key]));
+            } else {
+                formData.append(key, lessonDetails[key]);
+            }
+        });
+        if (videoFile) {
+            formData.append('video', videoFile);
+        }
+        if (thumbnailFile) {
+            formData.append('thumbnail', thumbnailFile);
+        }
+
         try {
-            const response = await API.post(`/lesson/create/${course._id}`, lessonDetails);
+            const response = await API.post(`/lesson/create/${course._id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setLessonUploadProgress(percentCompleted);
+                }
+            });
             const newLesson = response.data.lesson;
             setLessons([...lessons, newLesson]);
             setQuizzes(prev => ({...prev, [newLesson._id]: []}));
-            setLessonDetails({ title: '', content: '', videoUrl: '', duration: '', resources: [{ name: '', type: '', url: '' }] });
+            // Reset lesson form
+            setLessonDetails({ title: '', content: '', duration: '', resources: [{ name: '', type: '', url: '' }] });
+            setVideoFile(null);
+            setVideoPreview(null);
+            setThumbnailFile(null);
+            setThumbnailPreview(null);
         } catch (error) {
             console.error("Failed to add lesson:", error);
+        } finally {
+            setLessonUploadProgress(0);
         }
     };
 
@@ -286,13 +346,20 @@ const CreateCourse = () => {
                                                 <img src={imagePreview} alt="Thumbnail Preview" className="w-full max-w-xs h-auto rounded-lg" />
                                             </div>
                                         )}
+                                        {uploadProgress > 0 && (
+                                            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
+                                                <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
+                                            </div>
+                                        )}
                                     </div>
                                     <input type="text" name="tags" value={courseDetails.tags} onChange={handleCourseChange} placeholder="Tags (comma-separated, e.g., react, nodejs)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" />
                                     <div className="flex items-center gap-3">
                                         <input type="checkbox" name="published" checked={courseDetails.published} onChange={handleCourseChange} id="published" className="h-5 w-5" />
                                         <label htmlFor="published">Publish this course?</label>
                                     </div>
-                                    <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 transition">Save and Continue</button>
+                                    <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 transition" disabled={uploadProgress > 0}>
+                                        {uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : 'Save and Continue'}
+                                    </button>
                                 </form>
                             )}
 
@@ -302,7 +369,24 @@ const CreateCourse = () => {
                                         <h2 className="text-xl font-bold">Add a New Lesson</h2>
                                         <input type="text" name="title" value={lessonDetails.title} onChange={handleLessonChange} placeholder="Lesson Title" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" required />
                                         <textarea name="content" value={lessonDetails.content} onChange={handleLessonChange} placeholder="Lesson Content" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700 h-24" required />
-                                        <input type="text" name="videoUrl" value={lessonDetails.videoUrl} onChange={handleLessonChange} placeholder="Video URL" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" />
+                                        
+                                        <div>
+                                            <label htmlFor="video" className="block text-sm mb-1 text-neutral-300">Lesson Video (Max 100MB)</label>
+                                            <input type="file" name="video" id="video" onChange={handleVideoChange} accept="video/*" className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                                            {videoPreview && <video src={videoPreview} controls className="mt-4 w-full max-w-xs rounded-lg" />}
+                                            {lessonUploadProgress > 0 && (
+                                                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
+                                                    <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${lessonUploadProgress}%` }}></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div>
+                                            <label htmlFor="thumbnail" className="block text-sm mb-1 text-neutral-300">Lesson Thumbnail</label>
+                                            <input type="file" name="thumbnail" id="thumbnail" onChange={handleThumbnailChange} accept="image/*" className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                                            {thumbnailPreview && <img src={thumbnailPreview} alt="Thumbnail Preview" className="mt-4 w-full max-w-xs h-auto rounded-lg" />}
+                                        </div>
+
                                         <input type="text" name="duration" value={lessonDetails.duration} onChange={handleLessonChange} placeholder="Duration (e.g., 15 mins)" className="w-full bg-neutral-800 p-3 rounded-md border border-neutral-700" />
                                         
                                         <div>
@@ -318,7 +402,9 @@ const CreateCourse = () => {
                                             <button type="button" onClick={addResource} className="text-sm text-indigo-400 flex items-center gap-1"><FiPlus/> Add Resource</button>
                                         </div>
 
-                                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 transition flex items-center gap-2"><FiPlus /> Add Lesson</button>
+                                        <button type="submit" className="px-6 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 transition flex items-center gap-2" disabled={lessonUploadProgress > 0}>
+                                            {lessonUploadProgress > 0 ? `Uploading... ${lessonUploadProgress}%` : <><FiPlus /> Add Lesson</>}
+                                        </button>
                                     </form>
                                     <div>
                                         <h3 className="text-lg font-bold mb-4">Course Lessons</h3>

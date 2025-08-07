@@ -28,7 +28,6 @@ export const enrollFreeCourse = async (req, res) => {
   }
 };
 
-
 // ✅ Verify Payment & Enroll
 export const verifyPaymentAndEnroll = async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId } = req.body;
