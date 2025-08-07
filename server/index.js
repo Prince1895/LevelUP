@@ -42,7 +42,7 @@ const app = express();
 
   // 🌐 CORS
   app.use(cors({
-    origin: 'http://localhost:5173', // ✅ frontend URL
+    origin: 'https://levelup-green.vercel.app/', // ✅ frontend URL
     credentials: true,               // ✅ allow cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
