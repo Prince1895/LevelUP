@@ -3,7 +3,7 @@ import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import axios from 'axios';
+import API from '../api/axios'; // Import your configured Axios instance
 
 function Loginpage() {
   const [email, setEmail] = useState('');
@@ -23,24 +23,19 @@ function Loginpage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email, password }),
-});
+      // --- CHANGE THIS BACK TO USE THE API INSTANCE ---
+      const response = await API.post('/auth/login', { email, password });
+      const data = response.data; // Axios wraps the response in a `data` object
 
-      const data = await response.json();
+      // The rest of your logic remains the same
+      toast.success("Login successful!");
+      login(data.user, data.token);
+      navigate('/dashboard');
 
-      if (response.ok) {
-        toast.success("Login successful!");
-        login(data.user, data.token);
-        navigate('/dashboard');
-      } else {
-        toast.error(data.message || "Invalid credentials");
-      }
     } catch (error) {
       console.error('Login failed:', error);
-      toast.error("Something went wrong. Please try again.");
+      // Axios errors have a `response` object
+      toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
