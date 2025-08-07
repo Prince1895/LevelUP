@@ -40,13 +40,24 @@ const app = express();
   });
   app.use(limiter);
 
-  // 🌐 CORS
-  app.use(cors({
-    origin: 'https://levelup-green.vercel.app/', // ✅ frontend URL
-    credentials: true,               // ✅ allow cookies
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }));
+  const allowedOrigins = [
+  'https://levelup-green.vercel.app', // your main frontend
+  'https://levelup-aysmncecw-prince-kumars-projects-db57e47d.vercel.app', // your preview/staging build (Vercel)
+  'http://localhost:5173' // for local development
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (e.g. mobile apps, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 
 
   // 📡 Routes
