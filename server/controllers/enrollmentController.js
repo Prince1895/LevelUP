@@ -90,3 +90,25 @@ export const getEnrollmentsForCourse = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+// NEW: Mark a lesson as completed
+export const completeLesson = async (req, res) => {
+    const { courseId, lessonId } = req.body;
+    const userId = req.user._id;
+
+    try {
+        const enrollment = await Enrollment.findOneAndUpdate(
+            { user: userId, course: courseId },
+            { $addToSet: { completedLessons: lessonId } },
+            { new: true }
+        );
+
+        if (!enrollment) {
+            return res.status(404).json({ message: "Enrollment not found." });
+        }
+
+        res.status(200).json({ message: "Lesson marked as complete.", enrollment });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};

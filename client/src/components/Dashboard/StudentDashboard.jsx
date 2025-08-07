@@ -83,7 +83,7 @@ const StudentDashboard = () => {
                     <h1 className="text-3xl font-semibold mb-8 pt-10">Welcome, {user?.name}!</h1>
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div className=" text-white grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div className="bg-[#111] p-6 rounded-lg border border-gray-800">
                             <h3 className="text-lg font-semibold text-gray-400">Courses Enrolled</h3>
                             <p className="text-4xl font-bold">{stats.enrolled}</p>
@@ -106,11 +106,11 @@ const StudentDashboard = () => {
                     </div>
 
                     {/* My Courses Section */}
-                    <div className="bg-[#111] p-6 rounded-lg border border-gray-800">
+                    <div className="bg-[#111] p-6 rounded-lg border border-gray-800 text-white">
                         <h2 className="text-2xl font-bold mb-4">My Learning</h2>
                         {isLoading ? <p>Loading your courses...</p> : (
                             <div className="space-y-4">
-                                {enrollments.length > 0 ? enrollments.map(({ course, progress = 0 }) => (
+                                {enrollments.length > 0 ? enrollments.filter(enrollment => enrollment.course).map(({ course, progress = 0 }) => (
                                     <div key={course._id} className="bg-[#1a1a1a] p-4 rounded-lg flex items-center justify-between hover:bg-[#222] transition-colors">
                                         <div className="flex items-center gap-4">
                                             <img src={course.image || 'https://placehold.co/100x70/1a1a1a/FFF?text=Course'} alt={course.title} className="w-24 h-16 object-cover rounded-md" />

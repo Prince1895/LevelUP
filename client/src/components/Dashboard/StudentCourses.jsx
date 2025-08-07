@@ -8,9 +8,9 @@ import Sidebar from '@/components/Sidebar';
 import { FiX, FiClock, FiBarChart2, FiStar, FiUsers, FiBookOpen, FiAward, FiUser, FiSettings, FiSearch } from 'react-icons/fi';
 
 // --- Course Detail Modal ---
-const CourseDetailModal = ({ course, onClose, onEnroll }) => {
+const CourseDetailModal = ({ course, onClose, onEnroll, isEnrolled }) => {
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 text-white">
             <div className="bg-[#1a1a1a] p-8 rounded-lg w-full max-w-4xl border border-gray-700 max-h-[90vh] overflow-y-auto relative">
                 <button onClick={onClose} className="absolute top-4 right-4 text-2xl hover:text-red-500"><FiX /></button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -36,9 +36,15 @@ const CourseDetailModal = ({ course, onClose, onEnroll }) => {
                         </ul>
                         <div className="mt-8">
                             <h3 className="text-xl font-bold mb-2">Price: &#x20B9;{course.price.toFixed(2)}</h3>
-                            <button onClick={() => onEnroll(course)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition">
-                                {course.price === 0 ? 'Enroll for Free' : 'Enroll Now'}
-                            </button>
+                            {isEnrolled ? (
+                                <button disabled className="w-full py-3 bg-gray-500 rounded-lg font-semibold cursor-not-allowed">
+                                    Already Enrolled
+                                </button>
+                            ) : (
+                                <button onClick={() => onEnroll(course)} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition">
+                                    {course.price === 0 ? 'Enroll for Free' : 'Enroll Now'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -55,6 +61,7 @@ const StudentCourses = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [enrolledCourseIds, setEnrolledCourseIds] = useState(new Set());
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -63,29 +70,40 @@ const StudentCourses = () => {
         { label: "Browse Courses", path: "/student/courses", icon: <FiBookOpen /> },
         { label: "Certificates", path: "/student/certificates", icon: <FiAward /> },
         { label: "Profile", path: "/profile", icon: <FiUser /> },
-        { label: "Settings", path: "/settings", icon: <FiSettings /> },
+        
     ];
 
     useEffect(() => {
-        const fetchCourses = async () => {
+        const fetchAllData = async () => {
             setIsLoading(true);
             try {
-                const response = await API.get('/course/all');
-                setCourses(response.data.courses);
-                setFilteredCourses(response.data.courses);
+                const [coursesResponse, enrollmentsResponse] = await Promise.all([
+                    API.get('/course/all'),
+                    API.get('/enrollment/my')
+                ]);
+
+                const allCourses = coursesResponse.data.courses;
+                setCourses(allCourses);
+                setFilteredCourses(allCourses);
+
+                const enrolledIds = new Set(enrollmentsResponse.data.enrollments.map(e => e.course?._id));
+                setEnrolledCourseIds(enrolledIds);
+
             } catch (error) {
-                console.error("Failed to fetch courses:", error);
+                console.error("Failed to fetch data:", error);
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchCourses();
-    }, []);
+        if (user) {
+            fetchAllData();
+        }
+    }, [user]);
 
     useEffect(() => {
         const results = courses.filter(course =>
             course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            course.instructor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (course.instructor && course.instructor.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
             course.category.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setFilteredCourses(results);
@@ -120,6 +138,7 @@ const StudentCourses = () => {
                             courseId: course._id
                         });
                         alert("Payment successful! You are now enrolled.");
+                        setEnrolledCourseIds(new Set([...enrolledCourseIds, course._id]));
                     },
                     prefill: {
                         name: user.name,
@@ -158,8 +177,10 @@ const StudentCourses = () => {
                         </div>
                     </div>
                     {isLoading ? <p className="text-center">Loading courses...</p> : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {filteredCourses.map(course => (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 ">
+                            {filteredCourses.map(course => {
+                                const isEnrolled = enrolledCourseIds.has(course._id);
+                                return (
                                 <div key={course._id} onClick={() => setSelectedCourse(course)} className="cursor-pointer bg-[#111] border border-gray-800 rounded-lg shadow-lg hover:border-indigo-500 transition-all duration-300 flex flex-col">
                                     <img src={course.image || 'https://placehold.co/600x400/1a1a1a/FFF?text=Course'} alt={course.title} className="w-full h-48 object-cover rounded-t-lg"/>
                                     <div className="p-6 flex flex-col flex-grow">
@@ -171,17 +192,21 @@ const StudentCourses = () => {
                                             <span className="capitalize">{course.level}</span>
                                         </div>
                                         <div className="flex justify-between items-center mt-4">
-                                            <p className="text-lg font-bold text-indigo-400">&#x20B9;{course.price.toFixed(2)}</p>
+                                            {isEnrolled ? (
+                                                <span className="text-lg font-bold text-green-400">Enrolled</span>
+                                            ) : (
+                                                <p className="text-lg font-bold text-indigo-400">&#x20B9;{course.price.toFixed(2)}</p>
+                                            )}
                                             <span className="text-xs bg-gray-700 px-2 py-1 rounded-full">{course.category}</span>
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     )}
                 </main>
                 <Footer />
-                {selectedCourse && <CourseDetailModal course={selectedCourse} onClose={() => setSelectedCourse(null)} onEnroll={handleEnroll} />}
+                {selectedCourse && <CourseDetailModal course={selectedCourse} onClose={() => setSelectedCourse(null)} onEnroll={handleEnroll} isEnrolled={enrolledCourseIds.has(selectedCourse._id)} />}
             </div>
         </div>
     );

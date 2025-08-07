@@ -63,9 +63,8 @@ export const getCourseById = async (req, res) => {
 // Create a new course
 export const createCourse = async (req, res) => {
   try {
-    const imageFile = req.file;
-
     const { title, description, category, price, duration, published, level, tags } = req.body;
+    const imageFile = req.file;
 
     if (!title || !description || !category || !price || !duration || !level || !imageFile) {
       return res.status(400).json({ message: "Please fill all required fields." });
@@ -79,6 +78,8 @@ export const createCourse = async (req, res) => {
       fileName: imageFile.originalname,
       folder: "/skillsphere_courses"
     });
+    
+    fs.unlinkSync(imageFile.path); // FIX: Delete the temporary file after upload
 
     const optimizedImageUrl = imagekit.url({
       path: response.filePath,
@@ -89,15 +90,13 @@ export const createCourse = async (req, res) => {
       ]
     });
 
-    const image = optimizedImageUrl;
-
     const newCourse = new Course({
       title,
       description,
       category,
       price,
       duration,
-      image,
+      image: optimizedImageUrl, // FIX: Use the optimized URL
       instructor: req.user._id,
       published,
       level,
@@ -144,6 +143,7 @@ export const getInstructorCourses = async (req, res) => {
           published: 1,
           studentCount: 1,
           createdAt: 1,
+          image: 1
         }
       },
       { $sort: { createdAt: -1 } }
@@ -201,16 +201,21 @@ export const updateCourses = async (req, res) => {
         const result = await imagekit.upload({
           file: imagePath, 
           fileName: req.file.originalname,
-          folder: '/course-images',
+          folder: '/skillsphere_courses',
           useUniqueFileName: true,
-           
         });
 
-        // After uploading, you will get a URL from ImageKit
-        const imageUrl = result.url;
+        const optimizedImageUrl = imagekit.url({
+          path: result.filePath,
+          transformation: [
+            { quality: 'auto' },
+            { format: 'webp' },
+            { width: '1280' }
+          ]
+        });
 
         // Update the course's image field with the new image URL
-        course.image = imageUrl;
+        course.image = optimizedImageUrl;
 
         // Optionally, delete the uploaded file from the server after it's uploaded to ImageKit
         fs.unlinkSync(imagePath);
@@ -261,7 +266,8 @@ export const deleteCourse = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete course error:", error);
-    return res.status(500).
-    json({ message: "Server error", error: error.message });
-  }
-};
+    return res.status(500).json
+      ({ message: "Server error", error: error.message });
+      }
+      };
+      

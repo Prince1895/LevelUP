@@ -5,7 +5,8 @@ import {
   verifyPaymentAndEnroll,
   getMyEnrollments,
   getAllEnrollments, // Admin only
-  getEnrollmentsForCourse // New function
+  getEnrollmentsForCourse, // New function
+  completeLesson
 } from "../controllers/enrollmentController.js";
 
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -18,6 +19,7 @@ enrollmentRoutes.post("/free/:courseId", authMiddleware, enrollFreeCourse);
 
 enrollmentRoutes.post("/paid/verify", authMiddleware, verifyPaymentAndEnroll);
 enrollmentRoutes.get("/my", authMiddleware, getMyEnrollments);
+enrollmentRoutes.post("/complete-lesson", authMiddleware, completeLesson); // Add the new route
 
 // Admin & Instructor Route
 enrollmentRoutes.get("/course/:courseId", authMiddleware, requireRole("admin", "instructor"), getEnrollmentsForCourse);

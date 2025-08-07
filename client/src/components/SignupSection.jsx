@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api/axios"; // ✅ This works without alias
- // ✅ Axios instance with baseURL and credentials
+import API from "../api/axios"; // Axios instance with baseURL
+import toast from "react-hot-toast"; // ✅ Toast integration
 
 function SignupPage() {
   const [form, setForm] = useState({
@@ -14,6 +14,7 @@ function SignupPage() {
 
   const [showError, setShowError] = useState(false);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Prevent multiple clicks
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -32,6 +33,8 @@ function SignupPage() {
       return;
     }
 
+    setIsSubmitting(true); // ✅ Disable button
+
     try {
       const res = await API.post("/auth/register", {
         name: form.name,
@@ -40,17 +43,21 @@ function SignupPage() {
         role: form.role,
       });
 
-      alert(res.data.message); // or use a toast
+      toast.success(res.data.message || "Signup successful!");
       navigate("/login");
     } catch (err) {
       console.error("Signup error:", err);
-      setError(err.response?.data?.message || "Something went wrong.");
+      const errorMessage = err.response?.data?.message || "Something went wrong.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false); // ✅ Re-enable button
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#0d0d0d] pt-20 pb-20 text-white">
-      {/* Left - Welcome Section */}
+      {/* Left Section */}
       <div className="hidden lg:flex flex-1 flex-col justify-center items-center bg-[#0d0d0d] text-white p-10 text-center">
         <h2 className="text-4xl font-extrabold mb-4">
           Welcome to <span className="text-indigo-500">LEVELUP</span> 🚀
@@ -58,10 +65,9 @@ function SignupPage() {
         <p className="text-lg text-gray-300 max-w-md mb-6 leading-relaxed">
           Join a thriving community where{" "}
           <span className="text-indigo-400 font-semibold">students</span> grow
-          their skills through real-world learning,
-          <br />
-          and <span className="text-indigo-400 font-semibold">instructors</span>{" "}
-          share knowledge, build influence, and earn with purpose.
+          their skills, and{" "}
+          <span className="text-indigo-400 font-semibold">instructors</span>{" "}
+          share knowledge and earn with purpose.
         </p>
         <p className="text-sm text-gray-500 italic">
           Together, we Learn. Build. Grow. And Teach with Impact.
@@ -175,9 +181,14 @@ function SignupPage() {
 
             <button
               type="submit"
-              className="w-full py-2 px-4 mt-2 bg-indigo-600 hover:bg-indigo-700 rounded-md font-medium transition"
+              disabled={isSubmitting}
+              className={`w-full py-2 px-4 mt-2 rounded-md font-medium transition ${
+                isSubmitting
+                  ? "bg-indigo-400 cursor-not-allowed"
+                  : "bg-indigo-600 hover:bg-indigo-700"
+              }`}
             >
-              Sign Up
+              {isSubmitting ? "Signing Up..." : "Sign Up"}
             </button>
 
             {error && (

@@ -4,6 +4,7 @@ import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Signup from './Pages/Signup';
 import Dashboard from './Pages/Dashboard';
+import { Toaster } from 'react-hot-toast';
 
 // Instructor components
 import MyCoursesInstructor from "./components/Dashboard/MyCoursesInstructor";
@@ -18,10 +19,12 @@ import InstructorApprovals from "./components/Dashboard/InstructorApprovals";
 import AdminReports from "./components/Dashboard/AdminReports";
 import StudentCourses from "./components/Dashboard/StudentCourses";
 import Certificates from "./components/Dashboard/Certificates";
+import ContinueLearning from "./components/Dashboard/ContinueLearning";
 
 const App = () => {
   return (
     <>
+      <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -47,6 +50,7 @@ const App = () => {
         {/*Student Routes*/}
         <Route path="/student/courses" element={<StudentCourses/>}/>
         <Route path="/student/certificates" element={<Certificates />} />
+          <Route path="/learn/course/:courseId" element={<ContinueLearning />} />
         
       </Routes>
     </>

@@ -26,9 +26,7 @@ export const createLesson = async (req, res) => {
                 file: videoBuffer,
                 fileName: videoFile.originalname,
                 folder: "skillsphere_lessons",
-                resourceType: "video" ,// Specify resource type for videos
-                 transformation: [{ quality: "auto" }, { fetch_format: "auto" }] // Optimization for video
-                
+                resourceType: "video" // Specify resource type for videos
             });
 
             videoUrl = result.url;
@@ -44,7 +42,6 @@ export const createLesson = async (req, res) => {
                 file: thumbnailBuffer,
                 fileName: thumbnailFile.originalname,
                 folder: "skillsphere_lesson_thumbnails",
-                transformation: [{ quality: "auto" }, { fetch_format: "auto" }, { width: 1280 }]
             });
 
             thumbnailUrl = result.url;

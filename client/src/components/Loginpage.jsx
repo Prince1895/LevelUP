@@ -1,31 +1,47 @@
 import { SplineScene } from "@/components/ui/splite";
-import { useContext, useState } from 'react'; // Import useContext and useState
-import { AuthContext } from '../context/AuthContext'; // Import AuthContext
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+import { useContext, useState } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 function Loginpage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Please enter both email and password.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', { // Replace with your backend URL
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
       const data = await response.json();
+
       if (response.ok) {
+        toast.success("Login successful!");
         login(data.user, data.token);
         navigate('/dashboard');
       } else {
-        console.error(data.message);
+        toast.error(data.message || "Invalid credentials");
       }
     } catch (error) {
-      console.error('Login failed', error);
+      console.error('Login failed:', error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -47,6 +63,7 @@ function Loginpage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 rounded-md bg-neutral-800 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="you@example.com"
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -58,16 +75,21 @@ function Loginpage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 rounded-md bg-neutral-800 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="••••••••"
+                disabled={isSubmitting}
               />
             </div>
+
             <div className="flex justify-between items-center text-sm">
               <a href="#" className="text-indigo-400 hover:underline">Forgot password?</a>
             </div>
+
             <button
               type="submit"
-              className="w-full py-2 px-4 mt-2 bg-indigo-600 hover:bg-indigo-700 rounded-md font-medium transition"
+              className={`w-full py-2 px-4 mt-2 rounded-md font-medium transition 
+                ${isSubmitting ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+              disabled={isSubmitting}
             >
-              Sign In
+              {isSubmitting ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
@@ -77,6 +99,7 @@ function Loginpage() {
           </p>
         </div>
       </div>
+
       <div className="hidden lg:block flex-1 relative">
         <SplineScene
           scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
