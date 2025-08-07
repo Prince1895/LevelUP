@@ -41,9 +41,11 @@ const app = express();
   app.use(limiter);
 
   const allowedOrigins = [
-  'https://levelup-green.vercel.app', // your main frontend
-  'https://levelup-aysmncecw-prince-kumars-projects-db57e47d.vercel.app', // your preview/staging build (Vercel)
-  'http://localhost:5173' // for local development
+    'https://levelup01.vercel.app/',
+    'https://levelup-green.vercel.app', 
+    // your main frontend
+    'https://levelup-aysmncecw-prince-kumars-projects-db57e47d.vercel.app', // your preview/staging build (Vercel)
+    'http://localhost:5173' // for local development
 ];
 
 app.use(cors({
