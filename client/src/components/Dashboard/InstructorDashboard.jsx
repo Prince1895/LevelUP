@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import API from "@/api/axios";
 import { AuthContext } from "@/context/AuthContext";
-import { FiBook, FiPlusSquare, FiDollarSign, FiUser, FiEdit, FiTrash2, FiEye, FiUsers, FiFileText, FiBarChart2 } from "react-icons/fi";
+import { FiBook, FiPlusSquare, FiDollarSign, FiUser, FiEdit, FiTrash2, FiEye, FiUsers, FiFileText, FiBarChart2, FiCheckSquare, FiGrid } from "react-icons/fi";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import Navbar from '../Navbar';
@@ -23,6 +23,8 @@ const InstructorDashboard = () => {
     { label: "My Courses", path: "/instructor/courses", icon: <FiBook /> },
     { label: "Create Course", path: "/instructor/create", icon: <FiPlusSquare /> },
     { label: "Earnings", path: "/instructor/earnings", icon: <FiDollarSign /> },
+    { label: "Manage Quizzes", path: "/instructor/quizzes", icon: <FiCheckSquare/> },
+    { label: "Manage Marketplace", path: "/manage-marketplace", icon: <FiGrid /> },
     { label: "Profile", path: "/profile", icon: <FiUser /> },
   ];
 

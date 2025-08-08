@@ -2,7 +2,7 @@
 import React from 'react';
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
-import { FiBook, FiPlusSquare, FiDollarSign, FiUser } from "react-icons/fi";
+import { FiBook, FiPlusSquare, FiDollarSign, FiUser, FiGrid, FiCheckSquare } from "react-icons/fi";
 import Navbar from '../Navbar';
 
 const Earnings = () => {
@@ -11,6 +11,8 @@ const Earnings = () => {
         { label: "My Courses", path: "/instructor/courses", icon: <FiBook /> },
         { label: "Create Course", path: "/instructor/create", icon: <FiPlusSquare /> },
         { label: "Earnings", path: "/instructor/earnings", icon: <FiDollarSign /> },
+        { label: "Manage Quizzes", path: "/instructor/quizzes", icon: <FiCheckSquare /> },
+        { label: "Manage Marketplace", path: "/manage-marketplace", icon: <FiGrid /> },
         { label: "Profile", path: "/profile", icon: <FiUser /> },
     ];
 

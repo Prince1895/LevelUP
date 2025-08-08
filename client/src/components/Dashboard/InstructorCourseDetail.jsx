@@ -4,7 +4,7 @@ import API from "@/api/axios";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import Navbar from '../Navbar';
-import { FiEdit, FiTrash2, FiArrowLeft, FiFileText, FiBookOpen, FiUsers } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiArrowLeft, FiFileText, FiBookOpen, FiUsers, FiGrid } from "react-icons/fi";
 
 const InstructorCourseDetail = () => {
     const { courseId } = useParams();
@@ -20,6 +20,7 @@ const InstructorCourseDetail = () => {
         { label: "Dashboard", path: "/admin/dashboard" },
         { label: "User Management", path: "/admin/users" },
         { label: "Instructor Approvals", path: "/admin/approvals" },
+        { label: "Manage Marketplace", path: "/manage-marketplace", icon: <FiGrid /> },
         { label: "Reports", path: "/admin/reports" },
     ];
 

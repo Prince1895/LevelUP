@@ -20,6 +20,9 @@ import AdminReports from "./components/Dashboard/AdminReports";
 import StudentCourses from "./components/Dashboard/StudentCourses";
 import Certificates from "./components/Dashboard/Certificates";
 import ContinueLearning from "./components/Dashboard/ContinueLearning";
+import AllCourses from "./components/AllCourses";
+import Marketplace from "./Pages/Marketplace";
+import ManageMarketplace from "./components/Dashboard/ManageMarketplace";
 
 const App = () => {
   return (
@@ -30,15 +33,22 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Signup />} />
+        <Route path="/courses" element={<AllCourses/>} />
+        <Route path="/marketplace" element={<Marketplace/>} />
+
+
         
         {/* Common Authenticated Routes */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/manage-marketplace" element={<ManageMarketplace />} />
 
         {/* Instructor Routes */}
         <Route path="/instructor/courses" element={<MyCoursesInstructor />} />
         <Route path="/instructor/create" element={<CreateCourse />} />
         <Route path="/instructor/earnings" element={<Earnings />} />
+      
+
         
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />

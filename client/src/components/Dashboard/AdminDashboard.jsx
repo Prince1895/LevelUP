@@ -22,6 +22,7 @@ const AdminDashboard = () => {
         { label: "User Management", path: "/admin/users", icon: <FiUsers /> },
         { label: "Instructor Approvals", path: "/admin/approvals", icon: <FiUserCheck /> },
         { label: "Reports", path: "/admin/reports", icon: <FiFileText /> },
+        { label: "Manage Marketplace", path: "/manage-marketplace", icon: <FiGrid /> },
          { label: "Profile", path: "/profile", icon: <FiUser /> },
     ];
 
