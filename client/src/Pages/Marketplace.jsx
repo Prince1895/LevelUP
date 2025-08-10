@@ -7,7 +7,6 @@ import Footer from '@/components/Footer';
 import { FiShoppingCart, FiTrash2, FiCreditCard, FiPackage, FiFilter, FiShare2, FiX, FiLoader, FiAlertCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- Dummy Data for UI Preview ---
 const sampleProducts = [
     { _id: '1', name: 'Web Dev Study Kit', description: 'A comprehensive kit for aspiring web developers.', price: 499.00, category: 'eBook', image: 'https://m.media-amazon.com/images/I/71oTUAxrrCL._SY466_.jpg', createdBy: { name: 'Admin' } },
     { _id: '2', name: 'Data Science eBook', description: 'Master data science fundamentals with this eBook.', price: 799.00, category: 'eBook', image: 'https://m.media-amazon.com/images/I/A1l5b1RPffL._SY385_.jpg', createdBy: { name: 'Admin' } },

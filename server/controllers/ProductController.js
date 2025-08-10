@@ -3,9 +3,6 @@ import mongoose from 'mongoose';
 import imagekit from '../config/imagekit.js';
 import fs from 'fs';
 
-// @desc    Get all products (for admins) or public products
-// @route   GET /api/products/all
-// @access  Public / Private/Admin
 export const getAllProducts = async (req, res) => {
     try {
         const products = await Product.find({ published: true }).populate('createdBy', 'name');
@@ -15,9 +12,6 @@ export const getAllProducts = async (req, res) => {
     }
 };
 
-// @desc    Get products for the logged-in instructor or all for admin
-// @route   GET /api/products/my-products
-// @access  Private/Instructor/Admin
 export const getMyProducts = async (req, res) => {
     try {
         const query = req.user.role === 'admin' ? {} : { createdBy: req.user._id };
@@ -28,12 +22,7 @@ export const getMyProducts = async (req, res) => {
     }
 };
 
-// @desc    Create a product
-// @route   POST /api/products
-// @access  Private/Admin/Instructor
 export const createProduct = async (req, res) => {
-    // FIX: Add a check to ensure req.body exists. This prevents a server crash
-    // if the multipart/form-data middleware fails to parse the request.
     if (!req.body) {
         return res.status(400).json({ message: "Invalid request format. Could not parse form data." });
     }
@@ -41,7 +30,6 @@ export const createProduct = async (req, res) => {
     const { name, description, price, category } = req.body;
     const imageFile = req.file;
 
-    // --- More specific validation ---
     if (!name) return res.status(400).json({ message: "Product name is required." });
     if (!description) return res.status(400).json({ message: "Product description is required." });
     if (price === undefined || price === null || price < 0) return res.status(400).json({ message: "A valid product price is required." });
@@ -73,12 +61,8 @@ export const createProduct = async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 };
-
-// @desc    Update a product
-// @route   PUT /api/products/:id
-// @access  Private/Admin/Instructor
 export const updateProduct = async (req, res) => {
-    // FIX: Add a check here as well for robustness.
+
     if (!req.body) {
         return res.status(400).json({ message: "Invalid request format. Could not parse form data." });
     }
@@ -120,9 +104,7 @@ export const updateProduct = async (req, res) => {
     }
 };
 
-// @desc    Delete a product
-// @route   DELETE /api/products/:id
-// @access  Private/Admin/Instructor
+
 export const deleteProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
@@ -142,9 +124,6 @@ export const deleteProduct = async (req, res) => {
     }
 };
 
-// @desc    Toggle publish status of a product
-// @route   PUT /api/products/:id/publish
-// @access  Private/Admin/Instructor
 export const togglePublishStatus = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);

@@ -1,14 +1,14 @@
 import express from 'express';
-import {  createProduct, updateProduct, deleteProduct, getMyProducts } from '../controllers/ProductController.js';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
-import { requireRole } from '../middlewares/roleMiddleware.js';
-
-const router = express.Router();
-
-router.get('/', getMyProducts);
-router.post('/', authMiddleware, requireRole('instructor', 'admin'), createProduct);
-router.put('/:id', authMiddleware, requireRole('instructor', 'admin'), updateProduct);
-
-router.delete('/:id', authMiddleware, requireRole('instructor', 'admin'), deleteProduct);
-
-export default router;
+ import multer from 'multer';
+  import { getAllProducts, createProduct, updateProduct, deleteProduct, getMyProducts, togglePublishStatus } from '../controllers/ProductController.js'; 
+  import { authMiddleware } from '../middlewares/authMiddleware.js';
+   import { requireRole } from '../middlewares/roleMiddleware.js';
+    const router = express.Router();
+     const upload = multer({ dest: 'uploads/' });
+    router.get('/all', getAllProducts);
+      router.get('/my-products', authMiddleware, getMyProducts);
+       router.post('/', authMiddleware, requireRole('instructor', 'admin'), upload.single('image'), createProduct);
+        router.put('/:id', authMiddleware, requireRole('instructor', 'admin'), upload.single('image'), updateProduct); 
+        router.delete('/:id', authMiddleware, requireRole('instructor', 'admin'), deleteProduct);
+         router.put('/:id/publish', authMiddleware, requireRole('instructor', 'admin'), togglePublishStatus); 
+         export default router;
