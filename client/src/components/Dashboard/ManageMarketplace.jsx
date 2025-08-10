@@ -4,7 +4,7 @@ import { AuthContext } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
-import { FiPlusSquare, FiEdit, FiTrash2, FiToggleLeft, FiToggleRight, FiX, FiGrid, FiUsers, FiUserCheck, FiFileText, FiUser, FiBook, FiDollarSign, FiShoppingCart } from 'react-icons/fi';
+import { FiPlusSquare, FiEdit, FiTrash2, FiToggleLeft, FiToggleRight, FiX, FiGrid, FiUsers, FiUserCheck, FiFileText, FiUser, FiBook, FiDollarSign } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- Product Modal for Create/Edit ---
