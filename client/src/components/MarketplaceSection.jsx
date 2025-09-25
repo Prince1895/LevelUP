@@ -23,7 +23,7 @@ const MarketplaceSection = () => {
     }, []);
 
     return (
-        <section className="bg-white text-white py-16 px-6">
+        <section className="bg-black text-white py-16 px-6">
             <div className="max-w-7xl mx-auto">
                 <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">
                     Explore Our Marketplace
