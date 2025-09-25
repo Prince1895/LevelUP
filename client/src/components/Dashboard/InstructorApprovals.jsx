@@ -14,7 +14,8 @@ const InstructorApprovals = () => {
         { label: "User Management", path: "/admin/users", icon: <FiUsers /> },
         { label: "Instructor Approvals", path: "/admin/approvals", icon: <FiUserCheck /> },
         { label: "Reports", path: "/admin/reports", icon: <FiFileText /> },
-          { label: "Profile", path: "/profile", icon: <FiUser /> },
+        { label: "Manage Marketplace", path: "/manage-marketplace", icon: <FiGrid /> },
+        { label: "Profile", path: "/profile", icon: <FiUser /> },
     ];
 
     useEffect(() => {

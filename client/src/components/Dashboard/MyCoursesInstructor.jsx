@@ -4,7 +4,9 @@ import API from '@/api/axios';
 import { AuthContext } from '@/context/AuthContext';
 import {
     FiEdit, FiTrash2, FiPlusSquare, FiUsers, FiDollarSign, FiPercent,
-    FiBook, FiUser, FiFileText, FiArrowLeft, FiPlus, FiX, FiFilm, FiDownload, FiBarChart2
+    FiBook, FiUser, FiFileText, FiArrowLeft, FiPlus, FiX, FiFilm, FiDownload, FiBarChart2,
+    FiCheckSquare,
+    FiGrid
 } from 'react-icons/fi';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
@@ -285,6 +287,8 @@ const MyCoursesInstructor = () => {
       { label: "My Courses", path: "/instructor/courses", icon: <FiBook /> },
       { label: "Create Course", path: "/instructor/create", icon: <FiPlusSquare /> },
       { label: "Earnings", path: "/instructor/earnings", icon: <FiDollarSign /> },
+        { label: "Manage Quizzes", path: "/instructor/quizzes", icon: <FiCheckSquare /> },
+        { label: "Manage Marketplace", path: "/manage-marketplace", icon: <FiGrid /> },
       { label: "Profile", path: "/profile", icon: <FiUser /> },
     ];
   

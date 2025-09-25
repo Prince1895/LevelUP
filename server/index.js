@@ -16,6 +16,9 @@ import userRoutes from "./routes/userRoutes.js";
 import enrollmentRoutes from "./routes/enrollmentRoutes.js";
 import mongoose from 'mongoose';
 import router from "./routes/paymentRoutes.js";
+import productRoutes from "./routes/productRoutes.js"; // Import product routes
+import cartRoutes from "./routes/cartRoutes.js"; // Import cart routes
+import orderRoutes from "./routes/orderRoutes.js"; // Import order routes
 
 mongoose.set("debug", true);
 connectDB(); 
@@ -69,6 +72,9 @@ app.use(cors({
   app.use("/api/user", userRoutes);
   app.use("/api/enrollment", enrollmentRoutes);
   app.use("/api/enroll", router);
+  app.use("/api/products", productRoutes);
+  app.use("/api/cart", cartRoutes);
+  app.use("/api/orders", orderRoutes);
 
   // 🔥 Global error handler (fallback)
   app.use((err, req, res, next) => {

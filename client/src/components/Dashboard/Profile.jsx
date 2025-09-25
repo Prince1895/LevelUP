@@ -8,7 +8,8 @@ import Navbar from '../Navbar';
 import { 
     FiUser, FiEdit3, FiLock, FiSave, FiBookOpen, 
     FiAward, FiSettings, FiPlusSquare, FiDollarSign, 
-    FiGrid, FiUsers, FiUserCheck, FiFileText, FiX, FiBook
+    FiGrid, FiUsers, FiUserCheck, FiFileText, FiX, FiBook,
+    FiCheckSquare
 } from "react-icons/fi";
 
 // --- Update Profile Modal ---
@@ -110,6 +111,8 @@ const Profile = () => {
                     { label: "My Courses", path: "/instructor/courses", icon: <FiBook /> },
                     { label: "Create Course", path: "/instructor/create", icon: <FiPlusSquare /> },
                     { label: "Earnings", path: "/instructor/earnings", icon: <FiDollarSign /> },
+                    { label: "Manage Quizzes", path: "/instructor/quizzes", icon: <FiCheckSquare /> },
+                    { label: "Manage Marketplace", path: "/manage-marketplace", icon: <FiGrid /> },
                     { label: "Profile", path: "/profile", icon: <FiUser /> },
                 ];
             case 'admin':
@@ -118,6 +121,7 @@ const Profile = () => {
                     { label: "User Management", path: "/admin/users", icon: <FiUsers /> },
                     { label: "Instructor Approvals", path: "/admin/approvals", icon: <FiUserCheck /> },
                     { label: "Reports", path: "/admin/reports", icon: <FiFileText /> },
+                    { label: "Manage Marketplace", path: "/manage-marketplace", icon: <FiGrid /> },
                     { label: "Profile", path: "/profile", icon: <FiUser /> },
                 ];
             default:
