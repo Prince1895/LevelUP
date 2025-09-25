@@ -16,7 +16,7 @@ export default function BookSessionSection() {
   const [type, setType] = useState("1:1 Session");
 
   return (
-    <section className="bg-white py-16 px-6">
+    <section className="bg-black text-white py-16 px-6">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-start">
         {/* Instructors */}
         <div className="space-y-4">
